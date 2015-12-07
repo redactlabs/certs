@@ -169,4 +169,123 @@ Vlan1                  unassigned      YES unset  administratively down down
 Router#sh run # Large Output of running configuration
 Router#copy running-config startup-config
 
+SW1#
+%SYS-5-CONFIG_I: Configured from console by console
+
+SW1#sh vlan
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Fa0/1, Fa0/2, Fa0/3, Fa0/4
+                                                Fa0/5, Fa0/6, Fa0/7, Fa0/8
+                                                Fa0/9, Fa0/10, Fa0/11, Fa0/12
+                                                Fa0/13, Fa0/14, Fa0/15, Fa0/16
+                                                Fa0/17, Fa0/18, Fa0/19, Fa0/20
+                                                Fa0/21, Fa0/22, Fa0/23, Fa0/24
+                                                Gig0/1, Gig0/2
+1002 fddi-default                     act/unsup 
+1003 token-ring-default               act/unsup 
+1004 fddinet-default                  act/unsup 
+1005 trnet-default                    act/unsup 
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+1    enet  100001     1500  -      -      -        -    -        0      0
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    -        0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
+
+Remote SPAN VLANs
+------------------------------------------------------------------------------
+
+
+Primary Secondary Type              Ports
+------- --------- ----------------- ------------------------------------------
+
+
+## All ports belong to VLAN 1 by Default
+
+Switch>enable
+Switch#configure terminal
+Switch(config)#hostname SW1
+SW1#
+SW1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+SW1(config)#int vlan 1
+SW1(config-if)#ip addr 192.168.1.2 255.255.255.0
+SW1(config-if)#no shut
+
+SW1(config-if)#
+%LINK-5-CHANGED: Interface Vlan1, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Vlan1, changed state to up
+
+SW1(config-if)#
+SW1(config-if)#exit
+SW1(config)#ip default-gateway 192.168.1.1
+SW1(config)#banner mot #AUTHORIZE PERSONNEL ONLY#
+SW1(config)#enable ?
+  password  Assign the privileged level password
+  secret    Assign the privileged level secret
+SW1(config)#enable pas
+SW1(config)#enable pas
+SW1(config)#enable password cisco
+SW1(config)#enable se
+SW1(config)#enable secret global
+SW1(config)#line con 0
+SW1(config-line)#password console
+SW1(config-line)#login
+SW1(config-line)#line vty 0 4
+SW1(config-line)#password vty
+SW1(config-line)#login
+SW1(config-line)#
+SW1>en
+Password: 
+SW1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+SW1(config)#
+SW1(config)#service password-encryption
+SW1(config)#
+
+Switch>enable
+Switch#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+Switch(config)#hostname SW2
+SW2(config)#
+SW2(config)#end
+SW2#copy running-config startup-config
+Destination filename [startup-config]? 
+Building configuration...
+[OK]
+SW2#
+%SYS-5-CONFIG_I: Configured from console by console
+
+SW2#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+SW2(config)#int vlan 1 
+SW2(config-if)#ip addr 192.168.2.2 255.255.255.0
+SW2(config-if)#no shut
+
+SW2(config-if)#
+%LINK-5-CHANGED: Interface Vlan1, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Vlan1, changed state to up
+
+SW2(config-if)#
+SW2(config-if)#exit
+SW2(config)#ip def
+SW2(config)#ip default-gateway 192.168.2.1
+SW2(config)#
+SW2(config)#banner mot #AUTHORIZE PERSONNEL ONLY#
+SW2(config)#enable password cisco
+SW2(config)#enable secret global 
+SW2(config)#line con 0
+SW2(config-line)#password console
+SW2(config-line)#login
+SW2(config-line)#line vty 0 4 
+SW2(config-line)#password vty
+SW2(config-line)#login
+SW2(config-line)#
+
 

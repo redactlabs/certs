@@ -2,9 +2,30 @@
 
 I. Chapter 1
   A. TCP/IP and OSI Model: Data Encapsulation (Page 6) 
-    1. Application
-    2. Transport
-    3. Network (Router): Connect Networks, Sends Packets, TCP "IP Header" Packets 
-    4. Data Link (Switch): Connect End-Users, Sends Frames
-    5. Physical (Hub): Connect End-Users, Problem "Collisions"
-      
+    1. Application: End-User Input "DATA"
+    2. Transport (Segment): Data encapsulated with TCP, (TCP) encapsulated with TCP Header 
+    3. Network (Router): Connect Networks, (TCP + DATA) encapsulated with "IP Header" Packets = (IP + TCP + DATA)
+    4. Data Link (Switch): Connect End-Users, (IP + TCP + DATA) encapsulated with Frames = (IP + TCP + DATA + FRAME), 
+       Frames contain Mac Addresses
+      a. Retains the last 10 commands
+      b. Frames contain "MAC Addresses"
+      c. Purpose is to learn Mac Addresses
+      d. 
+    5. Physical (Hub): Connect End-Users, Problem "Collisions", Sent as Bits
+      a. 
+  B. Packet Tracer
+    1. Configuration
+      a. RED connection on PT = Port Shut by Default
+    2. TCP/IP
+    3. Switch Commands 
+      a. "enable" = Privilege Mode
+      b. "conf t" = Configure Terminal
+      c. "int fa0/10" = Configure Interface
+      d. "?" = list command line options
+      e. "clear mac-address-table" = clear table
+      f. "sh mac-a" = show 
+    4. PC (End-User) Commands
+      a. PC-PT-PC2: ping 192.168.12,13,11,10
+      b. Switch Mac Address Table Output
+         Vlan	Mac Address	Type	Ports
+    	 1	  

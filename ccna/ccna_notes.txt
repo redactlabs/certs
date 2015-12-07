@@ -206,6 +206,8 @@ Primary Secondary Type              Ports
 
 ## All ports belong to VLAN 1 by Default
 
+## Layer 1 Security
+
 Switch>enable
 Switch#configure terminal
 Switch(config)#hostname SW1
@@ -288,4 +290,184 @@ SW2(config-line)#password vty
 SW2(config-line)#login
 SW2(config-line)#
 
+## Port Security - Layer 2 Security
 
+SW1>en
+Password: 
+SW1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+SW1(config)#int ran
+SW1(config)#int range fa0/5 - 6
+SW1(config-if-range)#sw
+SW1(config-if-range)#switchport m
+SW1(config-if-range)#switchport mode 
+% Incomplete command.
+SW1(config-if-range)#mode acc
+SW1(config-if-range)#mode acce
+SW1(config-if-range)#mode access
+SW1(config-if-range)#mode access
+                      ^
+% Invalid input detected at '^' marker.
+	
+SW1(config-if-range)#switchport mode ?
+  access   Set trunking mode to ACCESS unconditionally
+  dynamic  Set trunking mode to dynamically negotiate access or trunk mode
+  trunk    Set trunking mode to TRUNK unconditionally
+SW1(config-if-range)#switchport mode ?
+  access   Set trunking mode to ACCESS unconditionally
+  dynamic  Set trunking mode to dynamically negotiate access or trunk mode
+  trunk    Set trunking mode to TRUNK unconditionally
+SW1(config-if-range)#switchport mode ac
+SW1(config-if-range)#switchport mode access 
+SW1(config-if-range)#switchport por
+SW1(config-if-range)#switchport port-security 
+SW1(config-if-range)#?
+  cdp               Global CDP configuration subcommands
+  channel-group     Etherchannel/port bundling configuration
+  channel-protocol  Select the channel protocol (LACP, PAgP)
+  description       Interface specific description
+  duplex            Configure duplex operation.
+  exit              Exit from interface configuration mode
+  ip                Interface Internet Protocol config commands
+  mdix              Set Media Dependent Interface with Crossover
+  mls               mls interface commands
+  no                Negate a command or set its defaults
+  shutdown          Shutdown the selected interface
+  spanning-tree     Spanning Tree Subsystem
+  speed             Configure speed operation.
+  storm-control     storm configuration
+  switchport        Set switching mode characteristics
+  tx-ring-limit     Configure PA level transmit ring limit
+SW1(config-if-range)#switchport port-security max
+SW1(config-if-range)#switchport port-security maximum ?
+  <1-132>  Maximum addresses
+SW1(config-if-range)#switchport port-security maximum 1
+SW1(config-if-range)#switchport port-security ?
+  mac-address  Secure mac address
+  maximum      Max secure addresses
+  violation    Security violation mode
+  <cr>
+SW1(config-if-range)#switchport port-security sti
+SW1(config-if-range)#switchport port-security stic
+SW1(config-if-range)#switchport port-security ma
+SW1(config-if-range)#switchport port-security mac
+SW1(config-if-range)#switchport port-security mac-address st
+SW1(config-if-range)#switchport port-security mac-address sticky 
+SW1(config-if-range)#switchport port-security vi
+SW1(config-if-range)#switchport port-security violation ?
+  protect   Security violation protect mode
+  restrict  Security violation restrict mode
+  shutdown  Security violation shutdown mode
+SW1(config-if-range)#switchport port-security violation res
+SW1(config-if-range)#switchport port-security violation restrict ?
+  <cr>
+SW1(config-if-range)#switchport port-security violation restrict 
+SW1(config-if-range)#end
+SW1#
+%SYS-5-CONFIG_I: Configured from console by console
+
+SW1#sh run
+Building configuration...
+
+Current configuration : 1543 bytes
+!
+version 12.2
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+service password-encryption
+!
+hostname SW1
+!
+enable secret 5 $1$mERr$824CE5IovOGhpZXVDz/bc0
+enable password 7 0822455D0A16
+!
+!
+!
+!
+!
+spanning-tree mode pvst
+!
+interface FastEthernet0/1
+!
+interface FastEthernet0/2
+!
+interface FastEthernet0/3
+!
+interface FastEthernet0/4
+!
+interface FastEthernet0/5
+ switchport mode access
+ switchport port-security
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+!
+interface FastEthernet0/6
+ switchport mode access
+ switchport port-security
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+!
+
+
+SW2#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+SW2(config)#interface fa0/5
+SW2(config-if)#switchport port-security violation restrict 
+SW2(config-if)#switchport mode access
+SW2(config-if)#switchport por
+SW2(config-if)#switchport port-security max
+SW2(config-if)#switchport port-security maximum 1
+SW2(config-if)#switchport port-security mac
+SW2(config-if)#switchport port-security mac-address st
+SW2(config-if)#switchport port-security mac-address sticky 
+SW2(config-if)#switchport port-security vi
+SW2(config-if)#switchport port-security violation re
+SW2(config-if)#switchport port-security violation restrict 
+SW2(config-if)#end
+SW2#
+%SYS-5-CONFIG_I: Configured from console by console
+
+SW2#
+
+
+## If the violation is set to "shutdown" all devices on this port
+## will lose connectivity as the port will be off and requires a 
+## "shut" and "no shut" on the shutdown interface
+## Simulate Port Security  by adding a new device on the secured port
+## with a IP within the same subnet and then try to reach the Router GW
+## An immediate "shutdown" occurs and a "shut" "noshut" will fix it
+## "restrict" is recommended over "shutdown"
+
+SW2#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+SW2(config)#switchport port-security violation ?
+% Unrecognized command
+SW2(config)#interface fa0/5
+SW2(config-if)#switchport port-security violation ?
+  protect   Security violation protect mode
+  restrict  Security violation restrict mode
+  shutdown  Security violation shutdown mode
+SW2(config-if)#switchport port-security violation shutdown 
+SW2(config-if)#
+%LINK-5-CHANGED: Interface FastEthernet0/5, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/5, changed state to down
+
+%LINK-5-CHANGED: Interface FastEthernet0/5, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/5, changed state to up
+
+SW2(config-if)#switchport port-security violation shutdown 
+%LINK-5-CHANGED: Interface FastEthernet0/5, changed state to administratively down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/5, changed state to down
+
+SW2(config-if)#shut 
+
+%LINK-5-CHANGED: Interface FastEthernet0/5, changed state to administratively down
+SW2(config-if)#no shut
+
+SW2(config-if)#
+%LINK-5-CHANGED: Interface FastEthernet0/5, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/5, changed state to up

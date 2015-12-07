@@ -119,3 +119,54 @@ Router(config-if)#no shut
 
 Router(config-if)#
 %LINK-5-CHANGED: Interface GigabitEthernet0/0, changed state to up
+
+Router(config-if)#end
+Router#
+%SYS-5-CONFIG_I: Configured from console by console
+
+Router#sh ip arp
+Protocol  Address          Age (min)  Hardware Addr   Type   Interface
+Internet  192.168.1.1             -   0030.A35D.B701  ARPA   GigabitEthernet0/0
+Internet  192.168.1.10            6   0030.F294.5723  ARPA   GigabitEthernet0/0
+Internet  192.168.1.11            7   00D0.D3A4.CA91  ARPA   GigabitEthernet0/0
+Internet  192.168.1.12            6   000C.CFA7.9D64  ARPA   GigabitEthernet0/0
+Internet  192.168.1.13            6   0006.2AE7.2257  ARPA   GigabitEthernet0/0
+Internet  192.168.2.1             -   0030.A35D.B702  ARPA   GigabitEthernet0/1
+Internet  192.168.2.10            7   00E0.8F19.6123  ARPA   GigabitEthernet0/1
+Router#
+
+
+Router#sh ip route
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
+       i - IS-IS, L1 - IS-IS level-1, L2 - IS-IS level-2, ia - IS-IS inter area
+       * - candidate default, U - per-user static route, o - ODR
+       P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+     192.168.1.0/24 is variably subnetted, 2 subnets, 2 masks
+C       192.168.1.0/24 is directly connected, GigabitEthernet0/0
+L       192.168.1.1/32 is directly connected, GigabitEthernet0/0
+     192.168.2.0/24 is variably subnetted, 2 subnets, 2 masks
+C       192.168.2.0/24 is directly connected, GigabitEthernet0/1
+L       192.168.2.1/32 is directly connected, GigabitEthernet0/1
+Router#
+
+Router#sh ip int br
+Interface              IP-Address      OK? Method Status                Protocol
+ 
+GigabitEthernet0/0     192.168.1.1     YES manual up                    up
+ 
+GigabitEthernet0/1     192.168.2.1     YES manual up                    up
+ 
+GigabitEthernet0/2     unassigned      YES unset  administratively down down
+ 
+Vlan1                  unassigned      YES unset  administratively down down
+
+Router#sh run # Large Output of running configuration
+Router#copy running-config startup-config
+
+

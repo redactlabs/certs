@@ -680,4 +680,757 @@ How many hosts?
 /32 - /23 
 2^9 = 512 - 2 = 510 Hosts
 
+## VLAN Best Practice (Managment VLAN)
 
+# Moving all ports from VLAN1 to VLAN99
+
+# Set IP Address of Switch to 192.168.99.2
+
+# Set Gateway to 192.168.99.1
+
+
+SW1#
+%SYS-5-CONFIG_I: Configured from console by console
+
+SW1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+SW1(config)#int ran fa0/1 -24
+SW1(config-if-range)#exit
+SW1(config)#int ran fa0/1 - 24
+SW1(config-if-range)#exit
+SW1(config)#exit
+SW1#
+%SYS-5-CONFIG_I: Configured from console by console
+conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+SW1(config)#int ran fa0/1 - 24
+SW1(config-if-range)#swi
+SW1(config-if-range)#switchport acce
+SW1(config-if-range)#switchport access lan
+SW1(config-if-range)#switchport access va
+SW1(config-if-range)#switchport access vl
+SW1(config-if-range)#switchport access vlan 99
+% Access VLAN does not exist. Creating vlan 99
+SW1(config-if-range)#int ran gi0/1 - 2
+SW1(config-if-range)#swi
+SW1(config-if-range)#switchport ac
+SW1(config-if-range)#switchport access vl
+SW1(config-if-range)#switchport access vlan 99
+SW1(config-if-range)#exit
+SW1(config)#int vla
+SW1(config)#int vlan 99 
+SW1(config-if)#
+%LINK-5-CHANGED: Interface Vlan99, changed state to up
+
+SW1(config-if)#ip
+SW1(config-if)#ip ad
+SW1(config-if)#ip address 192.168.1.99 255.255.255.0
+SW1(config-if)#no shut
+SW1(config-if)#ip def
+SW1(config-if)#ip defau
+SW1(config-if)#exit
+SW1(config)#ip de
+SW1(config)#int vlan 99 
+SW1(config-if)#no ip address 192.168.1.99 255.255.255.0
+                             ^
+% Invalid input detected at '^' marker.
+	
+SW1(config-if)#no ip address 
+SW1(config-if)#ip ad
+SW1(config-if)#ip address 192.168.99.2 255.255.255.0
+SW1(config-if)#no shut
+SW1(config-if)#exit
+SW1(config)#ip de
+SW1(config)#ip default-gateway 192.168.99.1
+SW1(config)#
+SW1(config)#exit
+
+SW1#sh vlan brief 
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    
+99   VLAN0099                         active    Fa0/1, Fa0/2, Fa0/3, Fa0/4
+                                                Fa0/5, Fa0/6, Fa0/7, Fa0/8
+                                                Fa0/9, Fa0/10, Fa0/11, Fa0/12
+                                                Fa0/13, Fa0/14, Fa0/15, Fa0/16
+                                                Fa0/17, Fa0/18, Fa0/19, Fa0/20
+                                                Fa0/21, Fa0/22, Fa0/23, Fa0/24
+                                                Gig0/1, Gig0/2
+1002 fddi-default                     active    
+1003 token-ring-default               active    
+1004 fddinet-default                  active    
+1005 trnet-default                    active    
+SW1#
+
+
+## Change from Dynamic Auto to Dynamic Desirable (Dynamic Truncking Protocol) DTP
+## AUTO to AUTO does not do anything
+
+# Trunking carries frames from multiple VLANs
+
+# Best Practice is disabling DTP
+
+
+## OSPF Calc
+
+      255.255.255.255
+    - 255.255.255.240
+/28   000.000.000.015
+
+R1#
+%SYS-5-CONFIG_I: Configured from console by console
+
+R1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R1(config)#router ?
+  bgp    Border Gateway Protocol (BGP)
+  eigrp  Enhanced Interior Gateway Routing Protocol (EIGRP)
+  ospf   Open Shortest Path First (OSPF)
+  rip    Routing Information Protocol (RIP)
+R1(config)#router osf
+R1(config)#router osp
+R1(config)#router ospf ?
+  <1-65535>  Process ID
+R1(config)#router ospf 1 
+R1(config-router)#netwo
+R1(config-router)#network ?
+  A.B.C.D  Network number
+R1(config-router)#network 172.16.1.16 ?
+  A.B.C.D  OSPF wild card bits
+R1(config-router)#network 172.16.1.16 0.0.0.15 ?
+  area  Set the OSPF area ID
+R1(config-router)#network 172.16.1.16 0.0.0.15 0
+                                               ^
+% Invalid input detected at '^' marker.
+	
+R1(config-router)#network 172.16.1.16 0.0.0.15 area 0
+R1(config-router)#network 192.168.10.0 0.0.0.3 area 0
+R1(config-router)#
+00:10:27: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.10.9 on Serial0/0 from LOADING to FULL, Loading Done
+
+R1(config-router)#network 192.168.10.4 0.0.0.3 area 0 
+R1(config-router)#
+00:11:45: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.10.10 on Serial0/1 from LOADING to FULL, Loading Done
+end
+R1#
+%SYS-5-CONFIG_I: Configured from console by console
+
+
+R1#
+%SYS-5-CONFIG_I: Configured from console by console
+
+R1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R1(config)#router ?
+  bgp    Border Gateway Protocol (BGP)
+  eigrp  Enhanced Interior Gateway Routing Protocol (EIGRP)
+  ospf   Open Shortest Path First (OSPF)
+  rip    Routing Information Protocol (RIP)
+R1(config)#router osf
+R1(config)#router osp
+R1(config)#router ospf ?
+  <1-65535>  Process ID
+R1(config)#router ospf 1 
+R1(config-router)#netwo
+R1(config-router)#network ?
+  A.B.C.D  Network number
+R1(config-router)#network 172.16.1.16 ?
+  A.B.C.D  OSPF wild card bits
+R1(config-router)#network 172.16.1.16 0.0.0.15 ?
+  area  Set the OSPF area ID
+R1(config-router)#network 172.16.1.16 0.0.0.15 0
+                                               ^
+% Invalid input detected at '^' marker.
+	
+R1(config-router)#network 172.16.1.16 0.0.0.15 area 0
+R1(config-router)#network 192.168.10.0 0.0.0.3 area 0
+R1(config-router)#
+00:10:27: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.10.9 on Serial0/0 from LOADING to FULL, Loading Done
+
+R1(config-router)#network 192.168.10.4 0.0.0.3 area 0 
+R1(config-router)#
+00:11:45: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.10.10 on Serial0/1 from LOADING to FULL, Loading Done
+end
+R1#
+%SYS-5-CONFIG_I: Configured from console by console
+
+R1#
+R1#sh rou
+R1#sh new
+R1#sh net
+R1#sh net
+R1#sh net
+R1#sh ip os
+R1#sh ip ospf ?
+  <1-65535>       Process ID number
+  border-routers  Border and Boundary Router Information
+  database        Database summary
+  interface       Interface information
+  neighbor        Neighbor list
+  virtual-links   Virtual link information
+  <cr>
+R1#sh ip ospf ne
+R1#sh ip ospf neighbor 
+
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+192.168.10.9      0   FULL/  -        00:00:36    192.168.10.2    Serial0/0
+192.168.10.10     0   FULL/  -        00:00:34    192.168.10.6    Serial0/1
+R1#debug
+R1#debug ip
+R1#debug ip os
+R1#debug ip ospf ?
+  adj     OSPF adjacency events
+  events  OSPF events
+R1#debug ip ospf ev
+R1#debug ip ospf events 
+OSPF events debugging is on
+R1#
+00:17:15: OSPF: Rcv hello from 192.168.10.10 area 0 from Serial0/1 192.168.10.6
+
+00:17:15: OSPF: End of hello processing
+
+00:17:18: OSPF: Rcv hello from 192.168.10.9 area 0 from Serial0/0 192.168.10.2
+
+00:17:18: OSPF: End of hello processing
+
+00:17:25: OSPF: Rcv hello from 192.168.10.10 area 0 from Serial0/1 192.168.10.6
+
+00:17:25: OSPF: End of hello processing
+
+00:17:28: OSPF: Rcv hello from 192.168.10.9 area 0 from Serial0/0 192.168.10.2
+
+00:17:28: OSPF: End of hello processing
+
+R1#
+00:17:35: OSPF: Rcv hello from 192.168.10.10 area 0 from Serial0/1 192.168.10.6
+
+00:17:35: OSPF: End of hello processing
+debug ip ospf events 
+00:17:38: OSPF: Rcv hello from 192.168.10.9 area 0 from Serial0/0 192.168.10.2
+
+00:17:38: OSPF: Endsh ip ospf neighbor 
+R1#
+00:17:45: OSPF: Rcv hello from 192.168.10.10 area 0 from Serial0/1 192.168.10.6
+
+00:17:45: OSPF: End of hello processing
+
+00:17:48: OSPF: Rcv hello from 192.168.10.9 area 0 from Serial0/0 192.168.10.2
+
+00:17:48: OSPF: End of hello processing
+
+00:17:55: OSPF: Rcv hello from 192.168.10.10 area 0 from Serial0/1 192.168.10.6
+
+00:17:55: OSPF: End of hello processing
+
+00:17:58: OSPF: Rcv hello from 192.168.10.9 area 0 from Serial0/0 192.168.10.2
+
+00:17:58: OSPF: End of hello processing
+
+00:18:05: OSPF: Rcv hello from 192.168.10.10 area 0 from Serial0/1 192.168.10.6
+
+00:18:05: OSPF: End of hello processing
+
+R1#
+R1#u all
+00:18:08: OSPF: Rcv hello from 192.168.10.9 area 0 from Serial0/0 192.168.10.2
+
+00:18:08: OSPF: End of hello processing
+
+All possible debugging has been turned off
+R1#sh ip os
+R1#sh ip ospf da
+R1#sh ip ospf database 
+            OSPF Router with ID (192.168.10.5) (Process ID 1)
+
+                Router Link States (Area 0)
+
+Link ID         ADV Router      Age         Seq#       Checksum Link count
+192.168.10.9    192.168.10.9    514         0x80000006 0x004dd9 5
+192.168.10.5    192.168.10.5    437         0x80000005 0x008c0b 5
+192.168.10.10   192.168.10.10   437         0x80000006 0x00c81d 5
+R1#
+
+R1#sh ip route 
+Codes: C - connected, S - static, I - IGRP, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
+       i - IS-IS, L1 - IS-IS level-1, L2 - IS-IS level-2, ia - IS-IS inter area
+       * - candidate default, U - per-user static route, o - ODR
+       P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+     10.0.0.0/24 is subnetted, 1 subnets
+O       10.10.10.0 [110/65] via 192.168.10.2, 00:11:19, Serial0/0
+     172.16.0.0/16 is variably subnetted, 2 subnets, 2 masks
+C       172.16.1.16/28 is directly connected, FastEthernet0/0
+O       172.16.1.32/29 [110/65] via 192.168.10.6, 00:10:05, Serial0/1
+     192.168.10.0/30 is subnetted, 3 subnets
+C       192.168.10.0 is directly connected, Serial0/0
+C       192.168.10.4 is directly connected, Serial0/1
+O       192.168.10.8 [110/65] via 192.168.10.2, 00:10:05, Serial0/0
+                     [110/65] via 192.168.10.6, 00:10:05, Serial0/1
+R1#
+
+R1#
+R1#sh int s0/0
+Serial0/0 is up, line protocol is up (connected)
+  Hardware is HD64570
+  Internet address is 192.168.10.1/30
+  MTU 1500 bytes, BW 128 Kbit, DLY 20000 usec,
+     reliability 255/255, txload 1/255, rxload 1/255
+  Encapsulation HDLC, loopback not set, keepalive set (10 sec)
+  Last input never, output never, output hang never
+  Last clearing of "show interface" counters never
+  Input queue: 0/75/0 (size/max/drops); Total output drops: 0
+  Queueing strategy: weighted fair
+  Output queue: 0/1000/64/0 (size/max total/threshold/drops)
+     Conversations  0/0/256 (active/max active/max total)
+     Reserved Conversations 0/0 (allocated/max allocated)
+     Available Bandwidth 96 kilobits/sec
+  5 minute input rate 54 bits/sec, 0 packets/sec
+  5 minute output rate 54 bits/sec, 0 packets/sec
+     157 packets input, 10736 bytes, 0 no buffer
+     Received 0 broadcasts, 0 runts, 0 giants, 0 throttles
+     0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored, 0 abort
+     113 packets output, 7840 bytes, 0 underruns
+     0 output errors, 0 collisions, 2 interface resets
+     0 output buffer failures, 0 output buffers swapped out
+
+R1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R1(config)#int s0/0
+R1(config-if)#band
+R1(config-if)#bandwidth ?
+  <1-10000000>  Bandwidth in kilobits
+R1(config-if)#bandwidth 10000
+R1(config-if)#end
+R1#
+%SYS-5-CONFIG_I: Configured from console by console
+sh
+% Incomplete command.
+R1#sh ip rou
+R1#sh ip route 
+Codes: C - connected, S - static, I - IGRP, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
+       i - IS-IS, L1 - IS-IS level-1, L2 - IS-IS level-2, ia - IS-IS inter area
+       * - candidate default, U - per-user static route, o - ODR
+       P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+     10.0.0.0/24 is subnetted, 1 subnets
+O       10.10.10.0 [110/11] via 192.168.10.2, 00:00:14, Serial0/0
+     172.16.0.0/16 is variably subnetted, 2 subnets, 2 masks
+C       172.16.1.16/28 is directly connected, FastEthernet0/0
+O       172.16.1.32/29 [110/12] via 192.168.10.2, 00:00:14, Serial0/0
+     192.168.10.0/30 is subnetted, 3 subnets
+C       192.168.10.0 is directly connected, Serial0/0
+C       192.168.10.4 is directly connected, Serial0/1
+O       192.168.10.8 [110/11] via 192.168.10.2, 00:00:14, Serial0/0
+R1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R1(config)#int s0/0
+R1(config-if)#shut
+
+R1(config-if)#
+%LINK-5-CHANGED: Interface Serial0/0, changed state to administratively down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Serial0/0, changed state to down
+
+00:30:23: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.10.9 on Serial0/0 from FULL to DOWN, Neighbor Down: Interface down or detached
+
+R1(config-if)#end
+R1#
+%SYS-5-CONFIG_I: Configured from console by console
+
+R1#sh ip route 
+Codes: C - connected, S - static, I - IGRP, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
+       i - IS-IS, L1 - IS-IS level-1, L2 - IS-IS level-2, ia - IS-IS inter area
+       * - candidate default, U - per-user static route, o - ODR
+       P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+     10.0.0.0/24 is subnetted, 1 subnets
+O       10.10.10.0 [110/66] via 192.168.10.6, 00:00:02, Serial0/1
+     172.16.0.0/16 is variably subnetted, 2 subnets, 2 masks
+C       172.16.1.16/28 is directly connected, FastEthernet0/0
+O       172.16.1.32/29 [110/65] via 192.168.10.6, 00:00:02, Serial0/1
+     192.168.10.0/30 is subnetted, 2 subnets
+C       192.168.10.4 is directly connected, Serial0/1
+O       192.168.10.8 [110/65] via 192.168.10.6, 00:00:02, Serial0/1
+R1#
+
+
+R1#sh ip protocols ?
+  <cr>
+R1#sh ip protocols 
+
+Routing Protocol is "ospf 1"
+  Outgoing update filter list for all interfaces is not set 
+  Incoming update filter list for all interfaces is not set 
+  Router ID 192.168.10.5
+  Number of areas in this router is 1. 1 normal 0 stub 0 nssa
+  Maximum path: 4
+  Routing for Networks:
+    172.16.1.16 0.0.0.15 area 0
+    192.168.10.0 0.0.0.3 area 0
+    192.168.10.4 0.0.0.3 area 0
+  Routing Information Sources:  
+    Gateway         Distance      Last Update 
+    192.168.10.5         110      00:07:05
+    192.168.10.9         110      00:07:05
+    192.168.10.10        110      00:00:17
+  Distance: (default is 110)
+
+R1#
+
+R1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R1(config)#int
+R1(config)#interface lo
+R1(config)#interface loopback 1
+
+R1(config-if)#
+%LINK-5-CHANGED: Interface Loopback1, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Loopback1, changed state to up
+
+R1(config-if)#ip ad
+R1(config-if)#ip address 1.1.1.1 255.255.255.255
+R1(config-if)#end
+R1#
+%SYS-5-CONFIG_I: Configured from console by console
+
+R1#copy run start
+Destination filename [startup-config]? 
+Building configuration...
+[OK]
+R1#
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Serial0/1, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Serial0/0, changed state to up
+
+00:00:25: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.10.9 on Serial0/0 from LOADING to FULL, Loading Done
+
+00:00:29: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.10.10 on Serial0/1 from LOADING to FULL, Loading Done
+
+
+R1>en
+R1#
+R1#sh ip pr
+R1#sh ip protocols 
+
+Routing Protocol is "ospf 1"
+  Outgoing update filter list for all interfaces is not set 
+  Incoming update filter list for all interfaces is not set 
+  Router ID 1.1.1.1
+  Number of areas in this router is 1. 1 normal 0 stub 0 nssa
+  Maximum path: 4
+  Routing for Networks:
+    172.16.1.16 0.0.0.15 area 0
+    192.168.10.0 0.0.0.3 area 0
+    192.168.10.4 0.0.0.3 area 0
+  Routing Information Sources:  
+    Gateway         Distance      Last Update 
+    1.1.1.1              110      00:00:13
+    192.168.10.5         110      00:09:39
+    192.168.10.9         110      00:00:17
+    192.168.10.10        110      00:00:13
+  Distance: (default is 110)
+
+R1#
+
+R2#
+%SYS-5-CONFIG_I: Configured from console by console
+
+R2#sh ip
+R2#sh ip pr
+R2#sh ip protocols 
+
+Routing Protocol is "ospf 10"
+  Outgoing update filter list for all interfaces is not set 
+  Incoming update filter list for all interfaces is not set 
+  Router ID 192.168.10.9
+  Number of areas in this router is 1. 1 normal 0 stub 0 nssa
+  Maximum path: 4
+  Routing for Networks:
+    10.10.10.0 0.0.0.255 area 0
+    192.168.10.0 0.0.0.3 area 0
+    192.168.10.8 0.0.0.3 area 0
+  Routing Information Sources:  
+    Gateway         Distance      Last Update 
+    1.1.1.1              110      00:02:58
+    192.168.10.5         110      00:12:24
+    192.168.10.9         110      00:03:02
+    192.168.10.10        110      00:02:58
+  Distance: (default is 110)
+
+R2#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R2(config)#rout
+R2(config)#router pr
+R2(config)#router os
+R2(config)#router ospf 10
+R2(config)#router ospf 10
+R2(config-router)#?
+  area                   OSPF area parameters
+  auto-cost              Calculate OSPF interface cost according to bandwidth
+  default-information    Control distribution of default information
+  distance               Define an administrative distance
+  exit                   Exit from routing protocol configuration mode
+  log-adjacency-changes  Log changes in adjacency state
+  neighbor               Specify a neighbor router
+  network                Enable routing on an IP network
+  no                     Negate a command or set its defaults
+  passive-interface      Suppress routing updates on an interface
+  redistribute           Redistribute information from another routing protocol
+  router-id              router-id for this OSPF process
+R2(config-router)#rout
+R2(config-router)#router-id 2.2.2.2
+R2(config-router)#Reload or use "clear ip ospf process" command, for this to take effect
+
+
+R2(config-router)#end
+R2#
+%SYS-5-CONFIG_I: Configured from console by console
+
+R2#copy run start
+Destination filename [startup-config]? 
+Building configuration...
+
+
+R2#
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Serial0/0, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Serial0/1, changed state to up
+
+00:00:20: %OSPF-5-ADJCHG: Process 10, Nbr 1.1.1.1 on Serial0/0 from LOADING to FULL, Loading Done
+
+00:00:28: %OSPF-5-ADJCHG: Process 10, Nbr 192.168.10.10 on Serial0/1 from LOADING to FULL, Loading Done
+
+R2#sh ip pr
+R2#sh ip protocols 
+
+Routing Protocol is "ospf 10"
+  Outgoing update filter list for all interfaces is not set 
+  Incoming update filter list for all interfaces is not set 
+  Router ID 2.2.2.2
+  Number of areas in this router is 1. 1 normal 0 stub 0 nssa
+  Maximum path: 4
+  Routing for Networks:
+    10.10.10.0 0.0.0.255 area 0
+    192.168.10.0 0.0.0.3 area 0
+    192.168.10.8 0.0.0.3 area 0
+  Routing Information Sources:  
+    Gateway         Distance      Last Update 
+    1.1.1.1              110      00:00:36
+    2.2.2.2              110      00:00:27
+    192.168.10.5         110      00:15:33
+    192.168.10.9         110      00:06:11
+    192.168.10.10        110      00:00:27
+  Distance: (default is 110)
+
+
+R1>en
+R1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R1(config)#rout
+R1(config)#router os
+R1(config)#router ospf 1
+R1(config-router)#
+R1(config-router)#netw
+R1(config-router)#network 1.1.1.1 0.0.0.0 area 0
+R1(config-router)#exit
+R1(config)#exit
+R1#
+%SYS-5-CONFIG_I: Configured from console by console
+
+R1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R1(config)#rou
+R1(config)#router os
+R1(config)#router ospf 1
+R1(config-router)#?
+  area                   OSPF area parameters
+  auto-cost              Calculate OSPF interface cost according to bandwidth
+  default-information    Control distribution of default information
+  distance               Define an administrative distance
+  exit                   Exit from routing protocol configuration mode
+  log-adjacency-changes  Log changes in adjacency state
+  neighbor               Specify a neighbor router
+  network                Enable routing on an IP network
+  no                     Negate a command or set its defaults
+  passive-interface      Suppress routing updates on an interface
+  redistribute           Redistribute information from another routing protocol
+  router-id              router-id for this OSPF process
+R1(config-router)#pas
+R1(config-router)#passive-interface fa0/0
+R1(config-router)#end
+R1#
+%SYS-5-CONFIG_I: Configured from console by console
+
+R1#sh ip pr
+R1#sh ip protocols 
+
+Routing Protocol is "ospf 1"
+  Outgoing update filter list for all interfaces is not set 
+  Incoming update filter list for all interfaces is not set 
+  Router ID 1.1.1.1
+  Number of areas in this router is 1. 1 normal 0 stub 0 nssa
+  Maximum path: 4
+  Routing for Networks:
+    172.16.1.16 0.0.0.15 area 0
+    192.168.10.0 0.0.0.3 area 0
+    192.168.10.4 0.0.0.3 area 0
+    1.1.1.1 0.0.0.0 area 0
+  Passive Interface(s): 
+    FastEthernet0/0
+  Routing Information Sources:  
+    Gateway         Distance      Last Update 
+    1.1.1.1              110      00:01:40
+    2.2.2.2              110      00:01:41
+    192.168.10.5         110      00:46:46
+    192.168.10.9         110      00:37:24
+    192.168.10.10        110      00:01:42
+  Distance: (default is 110)
+
+R1#
+
+R2#sh ip route 
+Codes: C - connected, S - static, I - IGRP, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
+       i - IS-IS, L1 - IS-IS level-1, L2 - IS-IS level-2, ia - IS-IS inter area
+       * - candidate default, U - per-user static route, o - ODR
+       P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+     1.0.0.0/32 is subnetted, 1 subnets
+O       1.1.1.1 [110/2] via 192.168.10.1, 00:00:10, Serial0/0
+     10.0.0.0/24 is subnetted, 1 subnets
+C       10.10.10.0 is directly connected, FastEthernet0/0
+     172.16.0.0/16 is variably subnetted, 2 subnets, 2 masks
+O       172.16.1.16/28 [110/2] via 192.168.10.1, 00:30:30, Serial0/0
+O       172.16.1.32/29 [110/2] via 192.168.10.10, 00:30:20, Serial0/1
+     192.168.10.0/30 is subnetted, 3 subnets
+C       192.168.10.0 is directly connected, Serial0/0
+O       192.168.10.4 [110/65] via 192.168.10.1, 00:30:20, Serial0/0
+                     [110/65] via 192.168.10.10, 00:30:20, Serial0/1
+C       192.168.10.8 is directly connected, Serial0/1
+R2#
+
+R2#ping 1.1.1.1
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 1.1.1.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/16/69 ms
+
+R2#
+
+R4#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+R4(config)#interface GigabitEthernet0/0
+R4(config-if)#ip address 172.16.1.18 255.255.0.0
+R4(config-if)#ip address 172.16.1.18 255.255.255.240
+R4(config-if)#no shutdown
+
+R4(config-if)#
+%LINK-5-CHANGED: Interface GigabitEthernet0/0, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0/0, changed state to up
+
+R4(config-if)#exit
+R4(config)#router osp
+R4(config)#router ospf 1
+R4(config-router)#netw
+R4(config-router)#network 172.16.1.18 0.0.0.0are
+R4(config-router)#network 172.16.1.18 0.0.0.0 are
+R4(config-router)#network 172.16.1.18 0.0.0.0 area 0
+R4(config-router)#end
+R4#
+
+
+R1#debug ip ospf adj 
+OSPF adjacency events debugging is on
+R1#conf t 
+Enter configuration commands, one per line.  End with CNTL/Z.
+R1(config)#rou
+R1(config)#router os
+R1(config)#router ospf 1
+R1(config-router)#no pas
+R1(config-router)#no passive-interface fa
+R1(config-router)#no passive-interface fa0/0
+R1(config-router)#
+00:55:29: OSPF: Backup seen Event before WAIT timer on FastEthernet0/0
+
+00:55:29: OSPF: DR/BDR election on FastEthernet0/0
+
+00:55:29: OSPF: Elect BDR 1.1.1.1
+
+00:55:29: OSPF: Elect DR 172.16.1.18
+
+00:55:29: OSPF: Elect BDR 1.1.1.1
+
+00:55:29: OSPF: Elect DR 172.16.1.18
+
+00:55:29:        DR: 172.16.1.18 (Id)   BDR: 1.1.1.1 (Id)
+
+00:55:29: OSPF: Send DBD to 172.16.1.18 on FastEthernet0/0 seq 0x1d85 opt 0x00 flag 0x7 len 32
+
+00:55:29: OSPF: Build router LSA for area 0, router ID 1.1.1.1, seq 0x8000000b
+
+00:55:33: OSPF: Rcv DBD from 172.16.1.18 on FastEthernet0/0 seq 0x4ab7 opt 0x00 flag 0x7 len 32  mtu 1500 state EXSTART
+
+00:55:33: OSPF: NBR Negotiation Done. We are the SLAVE
+
+00:55:33: OSPF: Send DBD to 172.16.1.18 on FastEthernet0/0 seq 0x4ab7 opt 0x00 flag 0x2 len 112
+
+00:55:33: OSPF: Rcv DBD from 172.16.1.18 on FastEthernet0/0 seq 0x4ab8 opt 0x00 flag 0x3 len 52  mtu 1500 state EXCHANGE
+
+00:55:33: OSPF: Send DBD to 172.16.1.18 on FastEthernet0/0 seq 0x4ab8 opt 0x00 flag 0x0 len 32
+
+00:55:33: OSPF: Rcv DBD from 172.16.1.18 on FastEthernet0/0 seq 0x4ab9 opt 0x00 flag 0x1 len 32  mtu 1500 state EXCHANGE
+
+00:55:33: OSPF: Send DBD to 172.16.1.18 on FastEthernet0/0 seq 0x4ab9 opt 0x00 flag 0x0 len 32
+
+00:55:33: Exchange Done with 172.16.1.18 on FastEthernet0/0
+
+00:55:33: OSPF: Database request to 172.16.1.18
+
+00:55:33: OSPF: sent LS REQ packet to 172.16.1.18, length 12
+
+00:55:33: OSPF: Send DBD to 172.16.1.18 on FastEthernet0/0 seq 0x4ab9 opt 0x00 flag 0x0 len 32
+
+00:55:33: Synchronized with with 172.16.1.18 on FastEthernet0/0, state FULL
+
+00:55:33: %OSPF-5-ADJCHG: Process 1, Nbr 172.16.1.18 on FastEthernet0/0 from LOADING to FULL, Loading Done
+
+00:55:33: OSPF: Build router LSA for area 0, router ID 1.1.1.1, seq 0x8000000b
+
+R1(config-router)#e
+00:55:39: OSPF: DR/BDR election on FastEthernet0/0
+
+00:55:39: OSPF: Elect BDR 1.1.1.1
+
+00:55:39: OSPF: Elect DR 172.16.1.18
+
+00:55:39:        DR: 172.16.1.18 (Id)   BDR: 1.1.1.1 (Id)
+nd
+R1#
+%SYS-5-CONFIG_I: Configured from console by console
+u all
+All possible debugging has been turned off

@@ -471,3 +471,173 @@ SW2(config-if)#
 %LINK-5-CHANGED: Interface FastEthernet0/5, changed state to up
 
 %LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/5, changed state to up
+
+## Configure VLANs
+
+SW1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+SW1(config)#vlan 2
+SW1(config-vlan)#name SALES
+SW1(config-vlan)#exit
+SW1(config)#
+%LINK-5-CHANGED: Interface FastEthernet0/8, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/8, changed state to up
+
+SW1(config)#int fa0/8
+SW1(config-if)#swi
+SW1(config-if)#switchport por
+SW1(config-if)#switchport port-security ac
+SW1(config-if)#switchport port-security acc
+SW1(config-if)#switchport port-security acce
+SW1(config-if)#swit
+SW1(config-if)#switchport ac
+SW1(config-if)#switchport access vla
+SW1(config-if)#switchport access vlan 2
+SW1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+SW1(config)#int fa0/10
+SW1(config-if)#sw
+SW1(config-if)#switchport mod
+SW1(config-if)#switchport mode ?
+  access   Set trunking mode to ACCESS unconditionally
+  dynamic  Set trunking mode to dynamically negotiate access or trunk mode
+  trunk    Set trunking mode to TRUNK unconditionally
+SW1(config-if)#switchport mode tru
+SW1(config-if)#switchport mode trunk 
+
+SW1(config-if)#
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/10, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/10, changed state to up
+
+SW1(config-if)#
+SW1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+SW1(config)#vlan 7
+SW1(config-vlan)#int fa0/11
+SW1(config-if)#sw
+SW1(config-if)#switchport ac
+SW1(config-if)#switchport access val
+SW1(config-if)#switchport access vla
+SW1(config-if)#switchport access vlan 7
+SW1(config-if)#exit
+SW1(config)#vlan 7
+SW1(config-vlan)#name MARKETING
+SW1(config-vlan)#exit
+SW1(config)#int fa0/11 
+SW1(config-if)#sw
+SW1(config-if)#switchport ac
+SW1(config-if)#switchport access vlan 7
+SW1(config-if)#
+
+
+
+SW2#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+SW2(config)#vlan 2
+SW2(config-vlan)#name SALES
+SW2(config-vlan)#exit
+SW2(config)#int
+%LINK-5-CHANGED: Interface FastEthernet0/9, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/9, changed state to up
+
+% Incomplete command.
+SW2(config)#swi
+SW2(config)#switc
+SW2(config)#int fa0/9
+SW2(config-if)#swit
+SW2(config-if)#switchport ac
+SW2(config-if)#switchport access vla
+SW2(config-if)#switchport access vlan 2
+
+
+SW2#sh vlan 
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Fa0/1, Fa0/2, Fa0/3, Fa0/4
+                                                Fa0/5, Fa0/6, Fa0/7, Fa0/8
+                                                Fa0/10, Fa0/11, Fa0/12, Fa0/13
+                                                Fa0/14, Fa0/15, Fa0/16, Fa0/17
+                                                Fa0/18, Fa0/19, Fa0/20, Fa0/21
+                                                Fa0/22, Fa0/23, Fa0/24, Gig0/1
+                                                Gig0/2
+2    SALES                            active    Fa0/9
+1002 fddi-default                     act/unsup 
+1003 token-ring-default               act/unsup 
+1004 fddinet-default                  act/unsup 
+1005 trnet-default                    act/unsup 
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+1    enet  100001     1500  -      -      -        -    -        0      0
+2    enet  100002     1500  -      -      -        -    -        0      0
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    -        0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
+
+Remote SPAN VLANs
+------------------------------------------------------------------------------
+
+
+Primary Secondary Type              Ports
+------- --------- ----------------- ------------------------------------------
+SW2#
+
+SW2#
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/10, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/10, changed state to up
+
+SW2#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+SW2(config)#int fa0/10
+SW2(config-if)#sw
+SW2(config-if)#switchport mod
+SW2(config-if)#switchport mode tr
+SW2(config-if)#switchport mode trunk 
+SW2(config-if)#
+SW2#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+SW2(config)#swit
+SW2(config)#vlan 7
+SW2(config-vlan)#name MARKETING
+SW2(config-vlan)#exit
+SW2(config)#int fa0/11
+SW2(config-if)#sw
+SW2(config-if)#switchport ac
+SW2(config-if)#switchport access vlan 7
+SW2(config-if)#no switchport access vlan 7
+SW2(config-if)#exit
+SW2(config)#int fa0/12
+SW2(config-if)#switchport access vlan 7
+
+## Subnetting with Tool #1 and Tool #2 MN
+
+192.168.4.70 /26 mn = 64
+255.255.255.192 [STEP 1] = Mask
+192.168.4.64 [STEP 2] = Network ID "64" derived by 70/64 = approx. 1 and 64*1=64
+192.168.4.(64 + 1) = 192.168.4.65 = First Valid +0.0.0.1
+192.168.4.(127 - 1) = 192.168.4.126 = Last Valid -0.0.0.1 
+192.168.4.(128 - 1) = 192.168.4.127 = Broadcast  IP -0.0.0.1
+192.168.4.(64 + mn) = 192.168.4.128 
+
+192.168.1.42 / 29   mn = 8
+255.255.255.248
+192.168.1.40 and "40" = 42 / 8 = 5 and 5*8
+192.168.1.(40 + 1) = 192.168.41 = First Valid
+192.168.1.(47 - 1) = 192.168.1.46 = Last Valid
+192.168.1.(48 - 1) = 192.168.1.47 = Broadcast IP 
+192.168.1.(40 + mn) = 192.168.1.48
+
+
+192.168.23.61 /28   mn = 16
+255.255.255.240
+192.168.23.48  (61 / 16 = 3 and 3*16 = 48)
+192.168.23.49 First 
+192.168.23.62 Last
+192.168.23.63 Broadcast
+192.168.23.64 (48 + 16) Next Address/Subnet

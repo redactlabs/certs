@@ -1,6 +1,3 @@
-henry.alonzo@infosecinstitute.com
-alonzo.henry@gmail.com
-TOOL #1				TOOL #2 MN
 
 DEC	2nd	3rd	4th	MN	
 128	/9	/17	/25	128	

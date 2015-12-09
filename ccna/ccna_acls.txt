@@ -1,0 +1,341 @@
+## ACL
+
+## Implicit Deny if "access-list 10 permit any" is missing
+
+R3#
+%SYS-5-CONFIG_I: Configured from console by console
+
+R3#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R3(config)#acc
+R3(config)#access-list ?
+  <1-99>     IP standard access list
+  <100-199>  IP extended access list
+R3(config)#access-list 10 ?
+  deny    Specify packets to reject
+  permit  Specify packets to forward
+  remark  Access list entry comment
+R3(config)#access-list 10 de
+R3(config)#access-list 10 deny ?
+  A.B.C.D  Address to match
+  any      Any source host
+  host     A single host address
+R3(config)#access-list 10 deny 172.16.1.20 ?
+  A.B.C.D  Wildcard bits
+  <cr>
+R3(config)#access-list 10 deny 172.16.1.20 0.0.0.0 
+R3(config)#access-list 10 per
+R3(config)#access-list 10 permit 172.16.1.16 0.0.0.15
+R3(config)#int fa0/0
+R3(config-if)#ip acc
+R3(config-if)#ip access-group ?
+  <1-199>  IP access list (standard or extended)
+  WORD     Access-list name
+R3(config-if)#ip access-group 10 ?
+  in   inbound packets
+  out  outbound packets
+R3(config-if)#ip access-group 10 ou
+R3(config-if)#ip access-group 10 out ?
+  <cr>
+R3(config-if)#ip access-group 10 out 
+R3(config-if)#end
+R3#
+%SYS-5-CONFIG_I: Configured from console by console
+
+R3#sh ac
+R3#sh access-lists 
+Standard IP access list 10
+    10 deny host 172.16.1.20
+    20 permit 172.16.1.16 0.0.0.15
+R3#sh access-lists 
+Standard IP access list 10
+    10 deny host 172.16.1.20 (72 match(es))
+    20 permit 172.16.1.16 0.0.0.15 (9 match(es))
+R3#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R3(config)#ac
+R3(config)#access-list 10
+R3(config)#access-list 10 per
+R3(config)#access-list 10 permit any ?
+  <cr>
+R3(config)#access-list 10 permit any 
+R3(config)#end
+R3#
+%SYS-5-CONFIG_I: Configured from console by console
+sh access-lists 
+Standard IP access list 10
+    10 deny host 172.16.1.20 (72 match(es))
+    20 permit 172.16.1.16 0.0.0.15 (9 match(es))
+    30 permit any
+R3#
+
+R3#sh ac
+R3#sh access-lists 
+Standard IP access list 10
+    10 deny host 172.16.1.20
+    20 permit 172.16.1.16 0.0.0.15
+R3#sh access-lists 
+Standard IP access list 10
+    10 deny host 172.16.1.20 (72 match(es))
+    20 permit 172.16.1.16 0.0.0.15 (9 match(es))
+R3#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R3(config)#ac
+R3(config)#access-list 10
+R3(config)#access-list 10 per
+R3(config)#access-list 10 permit any ?
+  <cr>
+R3(config)#access-list 10 permit any 
+R3(config)#end
+R3#
+%SYS-5-CONFIG_I: Configured from console by console
+sh access-lists 
+Standard IP access list 10
+    10 deny host 172.16.1.20 (72 match(es))
+    20 permit 172.16.1.16 0.0.0.15 (9 match(es))
+    30 permit any
+R3#
+R3#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R3(config)#acc
+R3(config)#access-list 5 de
+R3(config)#access-list 5 deny 10.10.10.10 0.0.0.0
+R3(config)#access-list 5 deny host 172.16.1.20
+R3(config)#en
+R3(config)#ena
+R3(config)#enable pas
+R3(config)#enable password cisco 
+R3(config)#line vty 0 4
+R3(config-line)#pas
+R3(config-line)#password vty 
+R3(config-line)#log
+R3(config-line)#logi
+R3(config-line)#login 
+R3(config-line)#access-c
+R3(config-line)#access-class ?
+  <1-199>  IP access list
+  WORD     Access-list name
+R3(config-line)#access-class 5 ?
+  in   Filter incoming connections
+  out  Filter outgoing connections
+R3(config-line)#access-class 5 in 
+R3(config-line)#end
+R3#
+%SYS-5-CONFIG_I: Configured from console by console
+
+R3#sh ac
+R3#sh access-lists 
+Standard IP access list 10
+    10 deny host 172.16.1.20 (72 match(es))
+    20 permit 172.16.1.16 0.0.0.15 (9 match(es))
+    30 permit any
+Standard IP access list 5
+    10 deny host 10.10.10.10
+    20 deny host 172.16.1.20
+R3#sh ip int br
+Interface              IP-Address      OK? Method Status                Protocol
+ 
+FastEthernet0/0        172.16.1.33     YES manual up                    up
+ 
+Serial0/0              192.168.10.6    YES manual up                    up
+ 
+Serial0/1              192.168.10.10   YES manual up                    up
+R3#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R3(config)#ac
+R3(config)#access-list 5 ?
+  deny    Specify packets to reject
+  permit  Specify packets to forward
+  remark  Access list entry comment
+R3(config)#access-list 5 per
+R3(config)#access-list 5 permit any
+R3(config)#end
+R3#
+%SYS-5-CONFIG_I: Configured from console by console
+
+R3#sh access-lists 
+Standard IP access list 10
+    10 deny host 172.16.1.20 (72 match(es))
+    20 permit 172.16.1.16 0.0.0.15 (9 match(es))
+    30 permit any
+Standard IP access list 5
+    10 deny host 10.10.10.10
+    20 deny host 172.16.1.20 (5 match(es))
+    30 permit any
+
+
+R3#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R3(config)#no acc
+R3(config)#no access-list 5
+R3(config)#no access-list 10
+R3(config)#int fa0/0
+R3(config-if)#no ip ac
+R3(config-if)#no ip access-group 10 out
+R3(config-if)#line vt
+R3(config-if)#line vty 0 4
+R3(config-line)#no ac
+R3(config-line)#no acc
+R3(config-line)#no acces
+R3(config-line)#no access-class 5 in
+
+R3#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R3(config)#ip ac
+R3(config)#ip access-list e
+R3(config)#ip access-list extended ?
+  <100-199>  Extended IP access-list number
+  WORD        name
+R3(config)#ip access-list ?
+  extended  Extended Access List
+  standard  Standard Access List
+R3(config)#ip access-list ex
+R3(config)#ip access-list extended CCNA_1 
+R3(config-ext-nacl)#?
+  <1-2147483647>  Sequence Number
+  default         Set a command to its defaults
+  deny            Specify packets to reject
+  exit            Exit from access-list configuration mode
+  no              Negate a command or set its defaults
+  permit          Specify packets to forward
+  remark          Access list entry comment
+R3(config-ext-nacl)#den
+R3(config-ext-nacl)#deny ?
+  ahp    Authentication Header Protocol
+  eigrp  Cisco's EIGRP routing protocol
+  esp    Encapsulation Security Payload
+  gre    Cisco's GRE tunneling
+  icmp   Internet Control Message Protocol
+  ip     Any Internet Protocol
+  ospf   OSPF routing protocol
+  tcp    Transmission Control Protocol
+  udp    User Datagram Protocol
+R3(config-ext-nacl)#deny icm
+R3(config-ext-nacl)#deny icmp ?
+  A.B.C.D  Source address
+  any      Any source host
+  host     A single source host
+R3(config-ext-nacl)#deny icmp 172.16.1.20 0.0.0.0 172.16.1.35 0.0.0.0 ?
+  <0-256>               type-num
+  echo                  Echo (ping)
+  echo-reply            Echo reply
+  host-unreachable      Host unreachable
+  net-unreachable       Net unreachable
+  port-unreachable      Port unreachable
+  protocol-unreachable  Protocol unreachable
+  ttl-exceeded          TTL exceeded
+  unreachable           All unreachables
+  <cr>
+R3(config-ext-nacl)#deny icmp 172.16.1.20 0.0.0.0 172.16.1.35 0.0.0.0 
+R3(config-ext-nacl)#den
+R3(config-ext-nacl)#deny tc
+R3(config-ext-nacl)#deny tcp 10.10.10.10 0.0.0.0 ?
+  A.B.C.D  Destination address
+  any      Any destination host
+  eq       Match only packets on a given port number
+  gt       Match only packets with a greater port number
+  host     A single destination host
+  lt       Match only packets with a lower port number
+  neq      Match only packets not on a given port number
+  range    Match only packets in the range of port numbers
+R3(config-ext-nacl)#deny tcp 10.10.10.10 0.0.0.0 172.16.1.35 0.0.0.0 eq www?
+www  
+R3(config-ext-nacl)#deny tcp 10.10.10.10 0.0.0.0 172.16.1.35 0.0.0.0 eq ?
+  <0-65535>  Port number
+  domain     Domain Name Service (DNS, 53)
+  ftp        File Transfer Protocol (21)
+  pop3       Post Office Protocol v3 (110)
+  smtp       Simple Mail Transport Protocol (25)
+  telnet     Telnet (23)
+  www        World Wide Web (HTTP, 80)
+R3(config-ext-nacl)#deny tcp 10.10.10.10 0.0.0.0 172.16.1.35 0.0.0.0 eq www
+R3(config-ext-nacl)#per
+R3(config-ext-nacl)#permit tc
+R3(config-ext-nacl)#permit ?
+  ahp    Authentication Header Protocol
+  eigrp  Cisco's EIGRP routing protocol
+  esp    Encapsulation Security Payload
+  gre    Cisco's GRE tunneling
+  icmp   Internet Control Message Protocol
+  ip     Any Internet Protocol
+  ospf   OSPF routing protocol
+  tcp    Transmission Control Protocol
+  udp    User Datagram Protocol
+R3(config-ext-nacl)#permit ip ?
+  A.B.C.D  Source address
+  any      Any source host
+  host     A single source host
+R3(config-ext-nacl)#permit ip any ?
+  A.B.C.D  Destination address
+  any      Any destination host
+  host     A single destination host
+R3(config-ext-nacl)#permit ip any any 
+R3(config-ext-nacl)#exit
+R3(config)#int fa0/0
+R3(config-if)#ip ac
+R3(config-if)#ip access-group ?
+  <1-199>  IP access list (standard or extended)
+  WORD     Access-list name
+R3(config-if)#ip access-group CCNA_1?
+WORD  
+R3(config-if)#ip access-group CCNA_1 ?
+  in   inbound packets
+  out  outbound packets
+R3(config-if)#ip access-group CCNA_1 out 
+R3(config-if)#end
+R3#
+%SYS-5-CONFIG_I: Configured from console by console
+
+R3#sh ac
+R3#sh access-lists 
+Extended IP access list CCNA_1
+    10 deny icmp host 172.16.1.20 host 172.16.1.35
+    20 deny tcp host 10.10.10.10 host 172.16.1.35 eq www
+    30 permit ip any any
+
+R3#sh access-lists 
+Extended IP access list CCNA_1
+    10 deny icmp host 172.16.1.20 host 172.16.1.35 (1 match(es))
+    20 deny tcp host 10.10.10.10 host 172.16.1.35 eq www (12 match(es))
+    30 permit ip any any (6 match(es))
+R3#
+
+R3#
+R3#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R3(config)#ip ac
+R3(config)#ip access-list e
+R3(config)#ip access-list extended CCNA_1
+R3(config-ext-nacl)#15 den
+R3(config-ext-nacl)#15 deny tc
+R3(config-ext-nacl)#15 ?
+  deny    Specify packets to reject
+  permit  Specify packets to forward
+R3(config-ext-nacl)#15 de
+R3(config-ext-nacl)#15 deny ?
+  ahp    Authentication Header Protocol
+  eigrp  Cisco's EIGRP routing protocol
+  esp    Encapsulation Security Payload
+  gre    Cisco's GRE tunneling
+  icmp   Internet Control Message Protocol
+  ip     Any Internet Protocol
+  ospf   OSPF routing protocol
+  tcp    Transmission Control Protocol
+  udp    User Datagram Protocol
+R3(config-ext-nacl)#15 deny tc
+R3(config-ext-nacl)#15 deny tcp ?
+  A.B.C.D  Source address
+  any      Any source host
+  host     A single source host
+R3(config-ext-nacl)#15 deny tcp 172.16.1.21 0.0.0.0 any eq www
+R3(config-ext-nacl)#end
+R3#
+%SYS-5-CONFIG_I: Configured from console by console
+
+R3#sh access-lists 
+Extended IP access list CCNA_1
+    10 deny icmp host 172.16.1.20 host 172.16.1.35 (1 match(es))
+    15 deny tcp host 172.16.1.21 any eq www
+    20 deny tcp host 10.10.10.10 host 172.16.1.35 eq www (12 match(es))
+    30 permit ip any any (6 match(es))
+R3#

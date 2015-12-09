@@ -1,0 +1,234 @@
+AT PC
+
+arp -a
+
+At Switch
+
+enable
+sh mac-address tables
+
+At ROUTER
+
+enable
+config t
+int gi0/1
+ip address 192.168.1.1 255.255.255.0
+no shut
+
+sh arp
+sh ip int brief
+sh ip route
+sh running-config
+copy running-config startup-config
+
+AT THE SWITCH
+!
+int vlan 1
+ip address 192.168.2.2 255.255.255.0
+no shut
+!
+ip default-gateway 192.168.2.1
+!
+SECURITY ONE
+!
+enable password cisco
+enable secret global
+banner motd #AUTHORIZE PERSONNEL ONLY#
+line con 0
+password console
+login
+line vty 0 4
+password vty
+login
+!
+service password-encryption
+!
+
+
+STATIC ROUTING
+
+AT R1
+
+ip route 192.168.4.0 255.255.255.0 192.168.3.2 
+
+VLANs and Trunks 
+
+STEP 1 to create vlans
+
+Vlan X
+name
+
+step 2 to assign ports to vlans
+
+int fa0/X
+switchport access vlan X
+
+STEP 3 To create a trunk link
+
+switchport mode trunk
+
+AT THE ROUTER INTER-VLAN Routing
+!
+int gi0/0.1
+encapsulation dot1q 1 native
+ip address 192.168.1.1 255.255.255.0
+!
+int gi0/0.2
+encapsulation dot1q 2
+ip address 192.168.2.1 255.255.255.0
+!
+int gi0/0.5
+encapsulation dot1q 5
+ip address 192.168.5.1 255.255.255.0
+
+SWITCH PORT SECURITY
+
+interface FastEthernet0/5
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict
+
+
+
+2001:0DB8:1111:0001:0000:0000:0000:0001/64
+
+2001:DB8:1111:1::1/64
+
+FE80::2D0:BAFF:FE89:E101
+
+
+sh ip eigrp neigbors
+sh ip eigrp topology
+sh ip route
+sh ip protocols
+
+SPANNING-TREE THEORY
+STEP 1
+
+ELECT ROOT BRIDGE   LOWEST BID
+BID = Priority & MAC Address
+all ports are DP
+STEP 2
+
+AT NON ROOT SWITCHES ELECT ROOT PORT
+ITS on LOWEST COST To THE ROOT
+
+STEP 3
+ELECT DESIGNATED PORT PER SEGMENT
+1 lowest BID
+2 lowest PRIORITY
+3 lowest PORT iD
+
+
+ETHERCHANNEL CONFIGURATION
+
+spanning-tree vlan 1 root primary
+
+int range fa0/x - y
+channel-group T mode on
+switchport mode trunk
+
+int range gi0/x - y
+channel-group T mode on
+switchport mode trunk
+
+
+
+P 192.168.10.0/30, 1 successors, FD is 21024000
+         via Connected, Serial0/0
+P 192.168.10.4/30, 1 successors, FD is 20512000
+         via Connected, Serial0/1
+P 192.168.10.8/30, 1 successors, FD is 21024000
+         via 192.168.10.6 (21024000/514304), Serial0/1
+         via 192.168.10.2 (21536000/514304), Serial0/0
+
+ipv6 unicast-routing
+ipv6 router ospf 1
+router-id 3.3.3.3
+int gi0/0
+ipv6 ospf 1 area 0
+int s0/0/0
+ipv6 ospf 1 area 0
+int s0/0/1
+ipv6 ospf 1 area 0
+
+FRAME-RELAY
+
+sh frame-relay ?
+
+lmi
+pvc
+map
+
+sh cdp neighbors
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

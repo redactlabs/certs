@@ -1,0 +1,177 @@
+## Etherchannel 
+
+
+SW1#
+SW1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+SW1(config)#spa
+SW1(config)#spanning-tree ?
+  mode      Spanning tree operating mode
+  portfast  Spanning tree portfast options
+  vlan      VLAN Switch Spanning Tree
+SW1(config)#spanning-tree vlan 1 root
+SW1(config)#spanning-tree vlan 1 root pr
+SW1(config)#spanning-tree vlan 1 root primary 
+SW1(config)#
+
+## LACP - IEEE Open Source
+
+## Cisco Proprietary: PAgP 
+
+## Best practice turn on etherchannel 
+
+SW1(config)#int ra
+SW1(config)#int range gi0/1 - 2
+SW1(config-if-range)#cha
+SW1(config-if-range)#chane
+SW1(config-if-range)#chann
+SW1(config-if-range)#channe
+SW1(config-if-range)#channel-g
+SW1(config-if-range)#channel-group ?
+  <1-6>  Channel group number
+SW1(config-if-range)#channel-group 1 ?
+  mode  Etherchannel Mode of the interface
+SW1(config-if-range)#channel-group 1 mo
+SW1(config-if-range)#channel-group 1 mode ?
+  active     Enable LACP unconditionally
+  auto       Enable PAgP only if a PAgP device is detected
+  desirable  Enable PAgP unconditionally
+  on         Enable Etherchannel only
+  passive    Enable LACP only if a LACP device is detected
+SW1(config-if-range)#channel-group 1 mode on 
+SW1(config-if-range)#
+Creating a port-channel interface Port-channel 1
+
+%LINK-5-CHANGED: Interface Port-channel 1, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Port-channel 1, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0/1, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0/1, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0/2, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0/2, changed state to up
+
+	
+
+SW1#sh run
+Building configuration...
+
+Current configuration : 1416 bytes
+!
+version 12.2
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+no service password-encryption
+!
+hostname SW1
+!
+!
+!
+!
+!
+spanning-tree mode pvst
+spanning-tree vlan 1 priority 24576
+!
+interface FastEthernet0/1
+ channel-group 2 mode on
+ switchport mode trunk
+!
+interface FastEthernet0/2
+ channel-group 2 mode on
+ switchport mode trunk
+!
+interface FastEthernet0/3
+ channel-group 2 mode on
+ switchport mode trunk
+!
+
+
+SW1#sh etherchannel port-channel 
+SW1#sh sp
+SW1#sh spanning-tree 
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    24577
+             Address     0001.C73A.12D7
+             This bridge is the root
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    24577  (priority 24576 sys-id-ext 1)
+             Address     0001.C73A.12D7
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  20
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Po2              Desg FWD 8         128.28   Shr
+Po1              Desg FWD 3         128.27   Shr
+
+SW3#sh spanning-tree 
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    24577
+             Address     0001.C73A.12D7
+             Cost        8
+             Port        27(Port-channel 2)
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     0030.F23E.998E
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  20
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Po2              Root FWD 8         128.27   Shr
+Po3              Altn BLK 8         128.28   Shr
+
+SW3#sh run
+Building configuration...
+
+Current configuration : 1428 bytes
+!
+version 12.2
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+no service password-encryption
+!
+hostname SW3
+!
+!
+!
+!
+!
+spanning-tree mode pvst
+!
+interface FastEthernet0/1
+ channel-group 2 mode on
+ switchport mode trunk
+!
+interface FastEthernet0/2
+ channel-group 2 mode on
+ switchport mode trunk
+!
+interface FastEthernet0/3
+ channel-group 2 mode on
+ switchport mode trunk
+!
+interface FastEthernet0/4
+ channel-group 3 mode on
+ switchport mode trunk
+!
+interface FastEthernet0/5
+ channel-group 3 mode on
+ switchport mode trunk
+!
+interface FastEthernet0/6
+ channel-group 3 mode on
+ switchport mode trunk
+!
+B
+B
+B
+B
+

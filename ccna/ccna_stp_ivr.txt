@@ -1,0 +1,357 @@
+
+## Spanning Tree blocks one port/link 
+## to avoid loops
+
+
+## STP to determine the Designated Ports (DP) ##
+
+## Which one is the 'root bridge'?
+
+All traffic from vlan one comes through me.
+
+Has a Root ID that is lower than the other switch "32768 + VLAN1 = 32769" mean we have a "lower Mac Address". 
+
+All ports are designated ports and forwarding "all green". 
+
+Designated ports are "Forwarding)
+
+## Default before changing the Root
+
+SW2#
+%SYS-5-CONFIG_I: Configured from console by console
+
+SW2#sh spann
+SW2#sh spanning-tree 
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     0001.4389.5B89
+             This bridge is the root
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     0001.4389.5B89
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  20
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Fa0/9            Desg FWD 19        128.9    P2p
+Fa0/10           Desg FWD 19        128.10   P2p
+
+SW2#a
+
+
+## CHANGED TO SW1
+
+SW1#
+%SYS-5-CONFIG_I: Configured from console by console
+\
+Translating "\"...domain server (255.255.255.255) % Name lookup aborted
+SW1#sh sp
+SW1#sh spanning-tree 
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    32769
+             Address     0001.4389.5B89
+             Cost        19
+             Port        9(FastEthernet0/9)
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     000B.BE7D.A3EE
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  20
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Fa0/9            Root FWD 19        128.9    P2p
+Fa0/10           Altn BLK 19        128.10   P2p
+
+SW1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+SW1(config)#sps
+SW1(config)#spa
+SW1(config)#spanning-tree ?
+  mode      Spanning tree operating mode
+  portfast  Spanning tree portfast options
+  vlan      VLAN Switch Spanning Tree
+SW1(config)#spanning-tree vla
+SW1(config)#spanning-tree vlan 1 ?
+  priority  Set the bridge priority for the spanning tree
+  root      Configure switch as root
+  <cr>
+SW1(config)#spanning-tree vlan 1 root ?
+  primary    Configure this switch as primary root for this spanning tree
+  secondary  Configure switch as secondary root
+SW1(config)#spanning-tree vlan 1 root ?
+  primary    Configure this switch as primary root for this spanning tree
+  secondary  Configure switch as secondary root
+SW1(config)#spanning-tree vlan 1 root pr
+SW1(config)#spanning-tree vlan 1 root primary 
+SW1(config)#exit
+SW1#
+%SYS-5-CONFIG_I: Configured from console by console
+
+SW1#sh sp
+SW1#sh spanning-tree 
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    24577
+             Address     000B.BE7D.A3EE
+             This bridge is the root
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    24577  (priority 24576 sys-id-ext 1)
+             Address     000B.BE7D.A3EE
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  20
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Fa0/9            Desg FWD 19        128.9    P2p
+Fa0/10           Desg FWD 19        128.10   P2p
+
+SW1#
+
+
+## PRIORITY VALUE CHANGED and 'root' is now SW1 ##
+
+SW2#sh sp
+SW2#sh spanning-tree 
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    24577
+             Address     000B.BE7D.A3EE
+             Cost        19
+             Port        9(FastEthernet0/9)
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     0001.4389.5B89
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  20
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Fa0/9            Root FWD 19        128.9    P2p
+Fa0/10           Altn BLK 19        128.10   P2p
+
+SW2#
+
+## Root Port is Fa0/9 with a cost '19' and priority # "128.9" and type
+
+## Change Fa0/10 with a Gi0/2 interface will change the root bridge as it has more bandwidth and lower cost
+
+SW2#sh spanning-tree 
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    24577
+             Address     000B.BE7D.A3EE
+             Cost        4
+             Port        26(GigabitEthernet0/2)
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     0001.4389.5B89
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  20
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Gi0/2            Root FWD 4         128.26   P2p
+Fa0/9            Altn BLK 19        128.9    P2p 
+
+## Change Fa0/9 to Gi0/1 and the lower interface number becomes root (wins!)
+
+SW2#sh spanning-tree 
+VLAN0001
+  Spanning tree enabled protocol ieee
+  Root ID    Priority    24577
+             Address     000B.BE7D.A3EE
+             Cost        4
+             Port        25(GigabitEthernet0/1)
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     0001.4389.5B89
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  20
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Gi0/1            Root FWD 4         128.25   P2p
+Gi0/2            Altn BLK 4         128.26   P2p
+
+
+## Need to set bpduguard for specific reasons to "not listening to BDPUs"
+
+
+## Throws a warning
+
+SW1(config-if)#spanning-tree portfast 
+%Warning: portfast should only be enabled on ports connected to a single
+host. Connecting hubs, concentrators, switches, bridges, etc... to this
+interface  when portfast is enabled, can cause temporary bridging loops.
+Use with CAUTION
+
+%Portfast has been configured on FastEthernet0/5 but will only
+have effect when the interface is in a non-trunking mode.
+
+
+
+## Blocking (BLK) to Listening (LSN) to Learning (LRN) to Forwarding (FWD)
+
+
+
+## Solution for latency (15 - 30 s) to fix links is rapid-pvst (Rapid Spanning Tree)
+
+
+# Change interface to "spanning-tree mode rapid-pvst"
+
+## Set new topology (4 switches) with SW1 as root bridge
+
+SW1(config)#
+SW1(config)#spa
+SW1(config)#spanning-tree vla
+SW1(config)#spanning-tree vlan 1 ro
+SW1(config)#spanning-tree vlan 1 root ?
+  primary    Configure this switch as primary root for this spanning tree
+  secondary  Configure switch as secondary root
+SW1(config)#spanning-tree vlan 1 root pr
+SW1(config)#spanning-tree vlan 1 root primary 
+
+
+## Calculate lowest value 
+
+Fa0/1 wins with 19 (1 hop) vs. Fa0/2 (2 hops 19 + 4 + 19)
+
+## Set primary and secondaries for vlan 2
+
+SW2#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+SW2(config)#vlan 2
+SW2(config-vlan)#exit
+SW2(config)#spa
+SW2(config)#spanning-tree val
+SW2(config)#spanning-tree vl
+SW2(config)#spanning-tree vlan 2 ro
+SW2(config)#spanning-tree vlan 2 root pr
+SW2(config)#spanning-tree vlan 2 root primary 
+SW2(config)#sap
+SW2(config)#sp
+SW2(config)#spanning-tree val
+SW2(config)#spanning-tree vl
+SW2(config)#spanning-tree vlan 2 ro
+SW2(config)#spanning-tree vlan 2 root  se
+SW2(config)#spanning-tree vlan 2 root  se
+SW2(config)#spanning-tree vlan 2 root  secondary 
+SW2(config)#
+
+SW1(config)#vlan 2
+SW1(config-vlan)#exit
+SW1(config)#sp
+SW1(config)#spanning-tree ?
+  mode      Spanning tree operating mode
+  portfast  Spanning tree portfast options
+  vlan      VLAN Switch Spanning Tree
+SW1(config)#spanning-tree va
+SW1(config)#spanning-tree vl
+SW1(config)#spanning-tree vlan 2 r
+SW1(config)#spanning-tree vlan 2 root se
+SW1(config)#spanning-tree vlan 2 root secondary 
+
+
+## Trunk carries frames from multiple vlans
+
+## Trunk SW1 
+
+
+SW1(config)#int range fa0/1 - 2
+SW1(config-if-range)#sw
+SW1(config-if-range)#switchport mod
+SW1(config-if-range)#switchport mode tr
+SW1(config-if-range)#switchport mode trunk 
+
+SW2(config)#int ra
+SW2(config)#int range fa0/1 -2 
+SW2(config-if-range)#sw
+SW2(config-if-range)#switchport mo
+SW2(config-if-range)#switchport mode tr
+SW2(config-if-range)#switchport mode trunk 
+
+SW2(config-if-range)#
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/2, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/2, changed state to up
+
+
+
+SW3(config)#int ra
+SW3(config)#int range gi0/1 -2 
+SW3(config-if-range)#sw
+SW3(config-if-range)#switchport m
+SW3(config-if-range)#switchport mode tr
+SW3(config-if-range)#switchport mode trunk 
+
+SW3(config-if-range)#
+%LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0/1, changed state to down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0/1, changed state to up
+
+SW2#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+SW2(config)#int fa0/
+SW2(config)#int fa0/3
+SW2(config-if)#sw
+SW2(config-if)#switchport ac
+SW2(config-if)#switchport access vla
+SW2(config-if)#switchport access vlan 2
+
+## Inter-VLAN Routing (Sub-Interfaces)
+
+AT THE ROUTER INTER-VLAN Routing
+!
+int gi0/0.1
+encapsulation dot1q 1 native
+ip address 192.168.1.1 255.255.255.0
+!
+int gi0/0.2
+encapsulation dot1q 2
+ip address 192.168.2.1 255.255.255.0
+!
+int gi0/0.5
+encapsulation dot1q 5
+ip address 192.168.5.1 255.255.255.0
+
+
+R1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R1(config)#int gi0/0
+R1(config-if)#no shut
+
+R1(config-if)#
+%LINK-5-CHANGED: Interface GigabitEthernet0/0, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0/0, changed state to up
+
+R1(config-if)#exit
+R1(config)#int gi0/0.1
+R1(config-subif)#encapsulation dot1q 1 native
+R1(config-subif)#ip address 192.168.1.1 255.255.255.0
+R1(config-subif)#!
+R1(config-subif)#int gi0/0.2
+R1(config-subif)#encapsulation dot1q 2
+R1(config-subif)#ip address 192.168.2.1 255.255.255.0
+R1(config-subif)#
+%LINK-5-CHANGED: Interface GigabitEthernet0/0.1, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0/0.1, changed state to up
+
+%LINK-5-CHANGED: Interface GigabitEthernet0/0.2, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0/0.2, changed state to up
+
+
+
+

@@ -109,7 +109,7 @@ STEP 1
 
 ELECT ROOT BRIDGE   LOWEST BID
 BID = Priority & MAC Address
-all ports are DP
+At the root, all ports are DP
 STEP 2
 
 AT NON ROOT SWITCHES ELECT ROOT PORT

@@ -1,0 +1,565 @@
+
+## EIGRP Lab
+
+# Checks every 5 seconds
+
+Router#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#rout
+Router(config)#router ?
+  bgp    Border Gateway Protocol (BGP)
+  eigrp  Enhanced Interior Gateway Routing Protocol (EIGRP)
+  ospf   Open Shortest Path First (OSPF)
+  rip    Routing Information Protocol (RIP)
+Router(config)#router eig
+Router(config)#router eigrp ?
+  <1-65535>  Autonomous system number
+Router(config)#router eigrp 10 ?
+  <cr>
+Router(config)#router eigrp 10 
+Router(config-router)#network 172.16.0.0 ?
+  A.B.C.D  EIGRP wild card bits
+  <cr>
+Router(config-router)#network 172.16.1.17 ?
+  A.B.C.D  EIGRP wild card bits
+  <cr>
+Router(config-router)#network 172.16.1.17 ?
+  A.B.C.D  EIGRP wild card bits
+  <cr>
+Router(config-router)#network 172.16.1.17 0.0.0.0
+Router(config-router)#netw
+Router(config-router)#network 192.168.10.1 0.0.0.0
+Router(config-router)#
+%DUAL-5-NBRCHANGE: IP-EIGRP 10: Neighbor 192.168.10.2 (Serial0/0) is up: new adjacency
+
+Router(config-router)#network 192.168.10.5 0.0.0.0
+Router(config-router)#
+%DUAL-5-NBRCHANGE: IP-EIGRP 10: Neighbor 192.168.10.6 (Serial0/1) is up: new adjacency
+
+Router(config-router)#
+Router(config-router)#end
+Router#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#hostname R1
+R1(config)#
+%SYS-5-CONFIG_I: Configured from console by console
+
+R1(config)#end
+R1#copy running-config startup-config
+Destination filename [startup-config]? 
+Building configuration...
+[OK]
+R1#
+%SYS-5-CONFIG_I: Configured from console by console
+
+R1#sh ei
+R1#sh ip e
+R1#sh ip eigrp ne
+R1#sh ip eigrp neighbors 
+IP-EIGRP neighbors for process 10
+H   Address         Interface      Hold Uptime    SRTT   RTO   Q   Seq
+                                   (sec)          (ms)        Cnt  Num
+0   192.168.10.2    Se0/0          14   00:01:02  40     1000  0   8
+1   192.168.10.6    Se0/1          14   00:00:28  40     1000  0   8
+
+R1#sh ip eigrp topology 
+IP-EIGRP Topology Table for AS 10/ID(192.168.10.5)
+
+Codes: P - Passive, A - Active, U - Update, Q - Query, R - Reply,
+       r - Reply status
+
+P 10.0.0.0/8, 1 successors, FD is 20514560
+         via 192.168.10.2 (20514560/28160), Serial0/0
+         via 192.168.10.6 (21026560/540160), Serial0/1
+P 172.16.0.0/16, 1 successors, FD is 28160
+         via Summary (28160/0), Null0
+P 172.16.1.16/28, 1 successors, FD is 28160
+         via Connected, FastEthernet0/0
+P 192.168.10.0/24, 1 successors, FD is 20512000
+         via Summary (20512000/0), Null0
+P 192.168.10.0/30, 1 successors, FD is 20512000
+         via Connected, Serial0/0
+P 192.168.10.4/30, 1 successors, FD is 20512000
+         via Connected, Serial0/1
+P 192.168.10.8/30, 2 successors, FD is 21024000
+         via 192.168.10.2 (21024000/514304), Serial0/0
+         via 192.168.10.6 (21024000/514304), Serial0/1
+R1#
+
+
+R1#sh ip route 
+Codes: C - connected, S - static, I - IGRP, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
+       i - IS-IS, L1 - IS-IS level-1, L2 - IS-IS level-2, ia - IS-IS inter area
+       * - candidate default, U - per-user static route, o - ODR
+       P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+D    10.0.0.0/8 [90/20514560] via 192.168.10.2, 00:04:07, Serial0/0
+     172.16.0.0/16 is variably subnetted, 2 subnets, 2 masks
+D       172.16.0.0/16 is a summary, 00:04:07, Null0
+C       172.16.1.16/28 is directly connected, FastEthernet0/0
+     192.168.10.0/24 is variably subnetted, 4 subnets, 2 masks
+D       192.168.10.0/24 is a summary, 00:04:07, Null0
+C       192.168.10.0/30 is directly connected, Serial0/0
+C       192.168.10.4/30 is directly connected, Serial0/1
+D       192.168.10.8/30 [90/21024000] via 192.168.10.2, 00:04:07, Serial0/0
+                        [90/21024000] via 192.168.10.6, 00:03:33, Serial0/
+
+
+R2#sh ip pro
+
+Routing Protocol is "eigrp  10 " 
+  Outgoing update filter list for all interfaces is not set 
+  Incoming update filter list for all interfaces is not set 
+  Default networks flagged in outgoing updates  
+  Default networks accepted from incoming updates 
+  EIGRP metric weight K1=1, K2=0, K3=1, K4=0, K5=0
+  EIGRP maximum hopcount 100
+  EIGRP maximum metric variance 1
+Redistributing: eigrp 10
+  Automatic network summarization is in effect  
+  Automatic address summarization: 
+    10.0.0.0/8 for Serial0/1, Serial0/0
+      Summarizing with metric 28160
+    192.168.10.0/24 for FastEthernet0/0
+      Summarizing with metric 514304
+  Maximum path: 4
+  Routing for Networks:  
+     10.0.0.0
+     192.168.10.0
+  Routing Information Sources:  
+    Gateway         Distance      Last Update 
+ --More-- 
+%DUAL-5-NBRCHANGE: IP-EIGRP 10: Neighbor 192.168.10.1 (Serial0/0) is up: new adjacency
+    192.168.10.10   90            7369       
+  Distance: internal 90 external 170
+
+R2#sh ip rout
+R2#sh ip route 
+Codes: C - connected, S - static, I - IGRP, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
+       i - IS-IS, L1 - IS-IS level-1, L2 - IS-IS level-2, ia - IS-IS inter area
+       * - candidate default, U - per-user static route, o - ODR
+       P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+     10.0.0.0/8 is variably subnetted, 2 subnets, 2 masks
+D       10.0.0.0/8 is a summary, 00:16:45, Null0
+C       10.10.10.0/24 is directly connected, FastEthernet0/0
+D    172.16.0.0/16 [90/540160] via 192.168.10.10, 00:16:38, Serial0/1
+     192.168.10.0/24 is variably subnetted, 4 subnets, 2 masks
+D       192.168.10.0/24 is a summary, 00:16:45, Null0
+C       192.168.10.0/30 is directly connected, Serial0/0
+D       192.168.10.4/30 [90/21024000] via 192.168.10.10, 00:12:08, Serial0/1
+                        [90/21024000] via 192.168.10.1, 00:06:33, Serial0/0
+C       192.168.10.8/30 is directly connected, Serial0/1
+R2#
+%DUAL-5-NBRCHANGE: IP-EIGRP 10: Neighbor 192.168.10.1 (Serial0/0) is resync: graceful restart
+
+%DUAL-5-NBRCHANGE: IP-EIGRP 10: Neighbor 192.168.10.10 (Serial0/1) is resync: graceful restart
+
+R2#sh ip route 
+Codes: C - connected, S - static, I - IGRP, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
+       i - IS-IS, L1 - IS-IS level-1, L2 - IS-IS level-2, ia - IS-IS inter area
+       * - candidate default, U - per-user static route, o - ODR
+       P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+     10.0.0.0/8 is variably subnetted, 2 subnets, 2 masks
+D       10.0.0.0/8 is a summary, 00:23:44, Null0
+C       10.10.10.0/24 is directly connected, FastEthernet0/0
+     172.16.0.0/16 is variably subnetted, 2 subnets, 2 masks
+D       172.16.1.16/28 [90/554496] via 192.168.10.1, 00:01:08, Serial0/0
+D       172.16.1.32/29 [90/540160] via 192.168.10.10, 00:00:42, Serial0/1
+     192.168.10.0/24 is variably subnetted, 4 subnets, 2 masks
+D       192.168.10.0/24 is a summary, 00:23:44, Null0
+C       192.168.10.0/30 is directly connected, Serial0/0
+D       192.168.10.4/30 [90/21024000] via 192.168.10.1, 00:01:08, Serial0/0
+                        [90/21024000] via 192.168.10.10, 00:00:42, Serial0/1
+C       192.168.10.8/30 is directly connected, Serial0/1
+R2#
+R2#
+R2#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R2(config)#route
+R2(config)#router e
+R2(config)#router eigrp 10
+R2(config-router)#no aut-
+R2(config-router)#no auto-
+R2(config-router)#no auto-summary 
+R2(config-router)#
+%DUAL-5-NBRCHANGE: IP-EIGRP 10: Neighbor 192.168.10.10 (Serial0/1) resync: summary configured
+
+%DUAL-5-NBRCHANGE: IP-EIGRP 10: Neighbor 192.168.10.1 (Serial0/0) resync: summary configured
+
+R2(config-router)#end
+R2#
+%SYS-5-CONFIG_I: Configured from console by console
+
+R2#sh ip route
+Codes: C - connected, S - static, I - IGRP, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
+       i - IS-IS, L1 - IS-IS level-1, L2 - IS-IS level-2, ia - IS-IS inter area
+       * - candidate default, U - per-user static route, o - ODR
+       P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+     10.0.0.0/24 is subnetted, 1 subnets
+C       10.10.10.0 is directly connected, FastEthernet0/0
+     172.16.0.0/16 is variably subnetted, 2 subnets, 2 masks
+D       172.16.1.16/28 [90/554496] via 192.168.10.1, 00:00:35, Serial0/0
+D       172.16.1.32/29 [90/540160] via 192.168.10.10, 00:00:35, Serial0/1
+     192.168.10.0/30 is subnetted, 3 subnets
+C       192.168.10.0 is directly connected, Serial0/0
+D       192.168.10.4 [90/21024000] via 192.168.10.1, 00:00:35, Serial0/0
+                     [90/21024000] via 192.168.10.10, 00:00:35, Serial0/1
+C       192.168.10.8 is directly connected, Serial0/1
+R2#
+
+
+Router#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#rout
+Router(config)#router ?
+  bgp    Border Gateway Protocol (BGP)
+  eigrp  Enhanced Interior Gateway Routing Protocol (EIGRP)
+  ospf   Open Shortest Path First (OSPF)
+  rip    Routing Information Protocol (RIP)
+Router(config)#router eig
+Router(config)#router eigrp ?
+  <1-65535>  Autonomous system number
+Router(config)#router eigrp 10 ?
+  <cr>
+Router(config)#router eigrp 10 
+Router(config-router)#network 172.16.0.0 ?
+  A.B.C.D  EIGRP wild card bits
+  <cr>
+Router(config-router)#network 172.16.1.17 ?
+  A.B.C.D  EIGRP wild card bits
+  <cr>
+Router(config-router)#network 172.16.1.17 ?
+  A.B.C.D  EIGRP wild card bits
+  <cr>
+Router(config-router)#network 172.16.1.17 0.0.0.0
+Router(config-router)#netw
+Router(config-router)#network 192.168.10.1 0.0.0.0
+Router(config-router)#
+%DUAL-5-NBRCHANGE: IP-EIGRP 10: Neighbor 192.168.10.2 (Serial0/0) is up: new adjacency
+
+Router(config-router)#network 192.168.10.5 0.0.0.0
+Router(config-router)#
+%DUAL-5-NBRCHANGE: IP-EIGRP 10: Neighbor 192.168.10.6 (Serial0/1) is up: new adjacency
+
+Router(config-router)#
+Router(config-router)#end
+Router#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#hostname R1
+R1(config)#
+%SYS-5-CONFIG_I: Configured from console by console
+
+R1(config)#end
+R1#copy running-config startup-config
+Destination filename [startup-config]? 
+Building configuration...
+[OK]
+R1#
+%SYS-5-CONFIG_I: Configured from console by console
+
+R1#sh ei
+R1#sh ip e
+R1#sh ip eigrp ne
+R1#sh ip eigrp neighbors 
+IP-EIGRP neighbors for process 10
+H   Address         Interface      Hold Uptime    SRTT   RTO   Q   Seq
+                                   (sec)          (ms)        Cnt  Num
+0   192.168.10.2    Se0/0          14   00:01:02  40     1000  0   8
+1   192.168.10.6    Se0/1          14   00:00:28  40     1000  0   8
+
+R1#
+R1#sh ip eigrp neighbors 
+IP-EIGRP neighbors for process 10
+H   Address         Interface      Hold Uptime    SRTT   RTO   Q   Seq
+                                   (sec)          (ms)        Cnt  Num
+0   192.168.10.2    Se0/0          11   00:01:55  40     1000  0   8
+1   192.168.10.6    Se0/1          12   00:01:21  40     1000  0   8
+
+R1#sh ip eigrp neighbors 
+IP-EIGRP neighbors for process 10
+H   Address         Interface      Hold Uptime    SRTT   RTO   Q   Seq
+                                   (sec)          (ms)        Cnt  Num
+0   192.168.10.2    Se0/0          10   00:01:56  40     1000  0   8
+1   192.168.10.6    Se0/1          11   00:01:22  40     1000  0   8
+
+R1#sh ip eigrp neighbors 
+IP-EIGRP neighbors for process 10
+H   Address         Interface      Hold Uptime    SRTT   RTO   Q   Seq
+                                   (sec)          (ms)        Cnt  Num
+0   192.168.10.2    Se0/0          14   00:01:57  40     1000  0   8
+1   192.168.10.6    Se0/1          14   00:01:23  40     1000  0   8
+
+R1#sh ip ei
+R1#sh ip eigrp ?
+  interfaces  IP-EIGRP interfaces
+  neighbors   IP-EIGRP neighbors
+  topology    IP-EIGRP Topology Table
+  traffic     IP-EIGRP Traffic Statistics
+R1#sh ip eigrp to
+R1#sh ip eigrp topology 
+IP-EIGRP Topology Table for AS 10/ID(192.168.10.5)
+
+Codes: P - Passive, A - Active, U - Update, Q - Query, R - Reply,
+       r - Reply status
+
+P 10.0.0.0/8, 1 successors, FD is 20514560
+         via 192.168.10.2 (20514560/28160), Serial0/0
+         via 192.168.10.6 (21026560/540160), Serial0/1
+P 172.16.0.0/16, 1 successors, FD is 28160
+         via Summary (28160/0), Null0
+P 172.16.1.16/28, 1 successors, FD is 28160
+         via Connected, FastEthernet0/0
+P 192.168.10.0/24, 1 successors, FD is 20512000
+         via Summary (20512000/0), Null0
+P 192.168.10.0/30, 1 successors, FD is 20512000
+         via Connected, Serial0/0
+P 192.168.10.4/30, 1 successors, FD is 20512000
+         via Connected, Serial0/1
+P 192.168.10.8/30, 2 successors, FD is 21024000
+         via 192.168.10.2 (21024000/514304), Serial0/0
+         via 192.168.10.6 (21024000/514304), Serial0/1
+R1#sh ip rou
+R1#sh ip route 
+Codes: C - connected, S - static, I - IGRP, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
+       i - IS-IS, L1 - IS-IS level-1, L2 - IS-IS level-2, ia - IS-IS inter area
+       * - candidate default, U - per-user static route, o - ODR
+       P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+D    10.0.0.0/8 [90/20514560] via 192.168.10.2, 00:04:07, Serial0/0
+     172.16.0.0/16 is variably subnetted, 2 subnets, 2 masks
+D       172.16.0.0/16 is a summary, 00:04:07, Null0
+C       172.16.1.16/28 is directly connected, FastEthernet0/0
+     192.168.10.0/24 is variably subnetted, 4 subnets, 2 masks
+D       192.168.10.0/24 is a summary, 00:04:07, Null0
+C       192.168.10.0/30 is directly connected, Serial0/0
+C       192.168.10.4/30 is directly connected, Serial0/1
+D       192.168.10.8/30 [90/21024000] via 192.168.10.2, 00:04:07, Serial0/0
+                        [90/21024000] via 192.168.10.6, 00:03:33, Serial0/1
+R1#
+R1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R1(config)#rou
+R1(config)#router fe
+R1(config)#router e
+R1(config)#router eigrp au
+R1(config)#router eigrp 10
+R1(config-router)#no auto
+R1(config-router)#no auto-summary ?
+  <cr>
+R1(config-router)#no auto-summary 
+R1(config-router)#
+%DUAL-5-NBRCHANGE: IP-EIGRP 10: Neighbor 192.168.10.2 (Serial0/0) resync: summary configured
+
+%DUAL-5-NBRCHANGE: IP-EIGRP 10: Neighbor 192.168.10.6 (Serial0/1) resync: summary configured
+
+R1(config-router)#
+%DUAL-5-NBRCHANGE: IP-EIGRP 10: Neighbor 192.168.10.6 (Serial0/1) is resync: graceful restart
+
+%DUAL-5-NBRCHANGE: IP-EIGRP 10: Neighbor 192.168.10.2 (Serial0/0) is resync: graceful restart
+
+R1(config-router)#end
+R1#
+%SYS-5-CONFIG_I: Configured from console by console
+
+
+R3#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R3(config)#rout
+R3(config)#router ei
+R3(config)#router eigrp 10
+R3(config-router)#no aut0
+R3(config-router)#no auto
+R3(config-router)#no auto-summary 
+R3(config-router)#
+%DUAL-5-NBRCHANGE: IP-EIGRP 10: Neighbor 192.168.10.9 (Serial0/1) resync: summary configured
+
+%DUAL-5-NBRCHANGE: IP-EIGRP 10: Neighbor 192.168.10.5 (Serial0/0) resync: summary configured
+
+R3(config-router)#
+%DUAL-5-NBRCHANGE: IP-EIGRP 10: Neighbor 192.168.10.9 (Serial0/1) is resync: graceful restart
+
+
+R1#sh ip route 
+Codes: C - connected, S - static, I - IGRP, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
+       i - IS-IS, L1 - IS-IS level-1, L2 - IS-IS level-2, ia - IS-IS inter area
+       * - candidate default, U - per-user static route, o - ODR
+       P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+     10.0.0.0/24 is subnetted, 1 subnets
+D       10.10.10.0 [90/20514560] via 192.168.10.2, 00:36:31, Serial0/0
+     172.16.0.0/16 is variably subnetted, 2 subnets, 2 masks
+C       172.16.1.16/28 is directly connected, FastEthernet0/0
+D       172.16.1.32/29 [90/20514560] via 192.168.10.6, 00:39:36, Serial0/1
+     192.168.10.0/30 is subnetted, 3 subnets
+C       192.168.10.0 is directly connected, Serial0/0
+C       192.168.10.4 is directly connected, Serial0/1
+D       192.168.10.8 [90/21024000] via 192.168.10.6, 00:39:36, Serial0/1
+                     [90/21024000] via 192.168.10.2, 00:36:31, Serial0/0
+R1#
+
+## s0/0/1 will be increased with higher delay
+
+
+R1#sh ip route 
+Codes: C - connected, S - static, I - IGRP, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
+       i - IS-IS, L1 - IS-IS level-1, L2 - IS-IS level-2, ia - IS-IS inter area
+       * - candidate default, U - per-user static route, o - ODR
+       P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+     10.0.0.0/24 is subnetted, 1 subnets
+D       10.10.10.0 [90/20770560] via 192.168.10.2, 00:00:05, Serial0/0
+     172.16.0.0/16 is variably subnetted, 2 subnets, 2 masks
+C       172.16.1.16/28 is directly connected, FastEthernet0/0
+D       172.16.1.32/29 [90/20514560] via 192.168.10.6, 00:42:22, Serial0/1
+     192.168.10.0/30 is subnetted, 3 subnets
+C       192.168.10.0 is directly connected, Serial0/0
+C       192.168.10.4 is directly connected, Serial0/1
+D       192.168.10.8 [90/21024000] via 192.168.10.6, 00:42:22, Serial0/1
+
+
+R1#sh ip eigrp topology 
+IP-EIGRP Topology Table for AS 10/ID(192.168.10.5)
+
+Codes: P - Passive, A - Active, U - Update, Q - Query, R - Reply,
+       r - Reply status
+
+P 10.10.10.0/24, 1 successors, FD is 20770560
+         via 192.168.10.2 (20770560/28160), Serial0/0
+         via 192.168.10.6 (21026560/540160), Serial0/1
+P 172.16.1.16/28, 1 successors, FD is 28160
+         via Connected, FastEthernet0/0
+P 172.16.1.32/29, 1 successors, FD is 20514560
+         via 192.168.10.6 (20514560/28160), Serial0/1
+         via 192.168.10.2 (21282560/540160), Serial0/0
+P 192.168.10.0/30, 1 successors, FD is 20768000
+         via Connected, Serial0/0
+P 192.168.10.4/30, 1 successors, FD is 20512000
+         via Connected, Serial0/1
+P 192.168.10.8/30, 1 successors, FD is 21024000
+         via 192.168.10.6 (21024000/514304), Serial0/1
+         via 192.168.10.2 (21280000/514304), Serial0/0
+
+
+## Before Variance Load Balance
+
+R1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R1(config)#route
+R1(config)#router ei
+R1(config)#router eigrp 10 ?
+  <cr>
+R1(config)#router eigrp 10 
+R1(config-router)#?
+  auto-summary       Enable automatic network number summarization
+  distance           Define an administrative distance
+  eigrp              EIGRP specific commands
+  exit               Exit from routing protocol configuration mode
+  metric             Modify IGRP routing metrics and parameters
+  neighbor           Specify a neighbor router
+  network            Enable routing on an IP network
+  no                 Negate a command or set its defaults
+  passive-interface  Suppress routing updates on an interface
+  redistribute       Redistribute information from another routing protocol
+  variance           Control load balancing variance
+R1(config-router)#var
+R1(config-router)#variance ?
+  <1-128>  Metric variance Multiplier
+R1(config-router)#variance 5
+R1(config-router)#
+%DUAL-5-NBRCHANGE: IP-EIGRP 10: Neighbor 192.168.10.6 (Serial0/1) is up: new adjacency
+
+%DUAL-5-NBRCHANGE: IP-EIGRP 10: Neighbor 192.168.10.2 (Serial0/0) is up: new adjacency
+
+R1(config-router)#end
+R1#
+%SYS-5-CONFIG_I: Configured from console by console
+
+R1#sh ip route 
+Codes: C - connected, S - static, I - IGRP, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
+       i - IS-IS, L1 - IS-IS level-1, L2 - IS-IS level-2, ia - IS-IS inter area
+       * - candidate default, U - per-user static route, o - ODR
+       P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+     10.0.0.0/24 is subnetted, 1 subnets
+D       10.10.10.0 [90/20770560] via 192.168.10.2, 00:00:07, Serial0/0
+                   [90/21026560] via 192.168.10.6, 00:00:07, Serial0/1
+     172.16.0.0/16 is variably subnetted, 2 subnets, 2 masks
+C       172.16.1.16/28 is directly connected, FastEthernet0/0
+D       172.16.1.32/29 [90/20514560] via 192.168.10.6, 00:00:07, Serial0/1
+                       [90/21282560] via 192.168.10.2, 00:00:07, Serial0/0
+     192.168.10.0/30 is subnetted, 3 subnets
+C       192.168.10.0 is directly connected, Serial0/0
+C       192.168.10.4 is directly connected, Serial0/1
+D       192.168.10.8 [90/21024000] via 192.168.10.6, 00:00:07, Serial0/1
+                     [90/21280000] via 192.168.10.2, 00:00:07, Serial0/0
+
+## Variance enabled Load Balancing
+
+R1#sh ip protocols 
+
+Routing Protocol is "eigrp  10 " 
+  Outgoing update filter list for all interfaces is not set 
+  Incoming update filter list for all interfaces is not set 
+  Default networks flagged in outgoing updates  
+  Default networks accepted from incoming updates 
+  EIGRP metric weight K1=1, K2=0, K3=1, K4=0, K5=0
+  EIGRP maximum hopcount 100
+  EIGRP maximum metric variance 5
+Redistributing: eigrp 10
+  Automatic network summarization is not in effect  
+  Maximum path: 4
+  Routing for Networks:  
+     172.16.1.17/32
+     192.168.10.1/32
+     192.168.10.5/32
+  Routing Information Sources:  
+    Gateway         Distance      Last Update 
+    192.168.10.6    90            4158556    
+    192.168.10.2    90            4159154    
+  Distance: internal 90 external 170
+
+
+

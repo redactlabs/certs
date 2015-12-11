@@ -1,0 +1,164 @@
+
+## Frame Relay
+
+Dubai#sh ip route 
+Codes: C - connected, S - static, I - IGRP, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
+       i - IS-IS, L1 - IS-IS level-1, L2 - IS-IS level-2, ia - IS-IS inter area
+       * - candidate default, U - per-user static route, o - ODR
+       P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+     172.30.0.0/16 is variably subnetted, 2 subnets, 2 masks
+C       172.30.0.0/28 is directly connected, Serial0/0/0
+D       172.30.4.0/24 [90/20514560] via 172.30.0.4, 00:22:19, Serial0/0/0
+     192.168.0.0/24 is variably subnetted, 5 subnets, 2 masks
+C       192.168.0.0/30 is directly connected, Serial0/1/0
+C       192.168.0.4/30 is directly connected, Serial0/2/0
+C       192.168.0.6/32 is directly connected, Serial0/2/0
+C       192.168.0.8/30 is directly connected, Serial0/3/0
+C       192.168.0.10/32 is directly connected, Serial0/3/0
+Dubai#sh fr
+Dubai#sh frame-relay ma
+Dubai#sh frame-relay map 
+Serial0/0/0 (up): ip 172.30.0.2 dlci 704, dynamic, 
+              broadcast, 
+              CISCO, status defined, active
+Serial0/0/0 (up): ip 172.30.0.3 dlci 196, dynamic, 
+              broadcast, 
+              CISCO, status defined, active
+Serial0/0/0 (up): ip 172.30.0.5 dlci 344, dynamic, 
+              broadcast, 
+              CISCO, status defined, active
+Serial0/0/0 (up): ip 172.30.0.4 dlci 702, dynamic, 
+              broadcast, 
+              CISCO, status defined, active
+Dubai#sh frame-relay ?
+  lmi  show frame relay lmi statistics
+  map  Frame-Relay map table
+  pvc  show frame relay pvc statistics
+Dubai#sh frame-relay 
+
+## Q1 Answer derived by Route table and frame relay map
+D       172.30.4.0/24 [90/20514560] via 172.30.0.4, 00:22:19, Serial0/0/0
+Serial0/0/0 (up): ip 172.30.0.4 dlci 702, dynamic,
+
+
+## Q2: create a map to S-AMER. Answer
+Serial0/0/0 (up): ip 172.30.0.3 dlci 196, dynamic, 
+
+Dubai#frame-relay map ip 172.30.0.3 196 broadcast
+
+## Q3: Check the running config to see who's running the default encapsulation
+
+Dubai#sh run
+
+
+interface FastEthernet0/0
+ no ip address
+ duplex auto
+ speed auto
+ shutdown
+!
+interface FastEthernet0/1
+ no ip address
+ duplex auto
+ speed auto
+ shutdown
+!
+interface Serial0/0/0
+ ip address 172.30.0.1 255.255.255.240
+ encapsulation frame-relay
+ clock rate 64000
+!
+interface Serial0/1/0
+ ip address 192.168.0.1 255.255.255.252
+ clock rate 64000
+!
+interface Serial0/2/0
+ ip address 192.168.0.5 255.255.255.252
+ encapsulation ppp
+ clock rate 64000
+!
+interface Serial0/3/0
+ ip address 192.168.0.9 255.255.255.252
+ encapsulation ppp
+ ppp authentication chap
+ clock rate 64000
+!
+interface Vlan1
+ no ip address
+ shutdown
+
+Dubai#sh cdp ne
+Dubai#sh cdp neighbors 
+Capability Codes: R - Router, T - Trans Bridge, B - Source Route Bridge
+                  S - Switch, H - Host, I - IGMP, r - Repeater, P - Phone
+Device ID    Local Intrfce   Holdtme    Capability   Platform    Port ID
+DeepSouth    Ser 0/2/0        143            R       C2800       Ser 0/0/0
+MidEast      Ser 0/1/0        145            R       C2800       Ser 0/0/0
+NorthCentral 
+             Ser 0/3/0        142            R       C2800       Ser 0/0/0
+Dubai#
+
+
+## Q4: what password should be configured: HDLC does not support authentication
+
+
+## Q5: what password should be configured on the router in the NorthCentral branch: 
+## On the 'sh run' a username and password are listed with the hostname of the device
+
+!
+username NorthCentral password 0 cisco
+!
+!
+!
+!
+!
+!
+!
+!
+ip ssh version 1
+!
+!
+spanning-tree mode pvst
+!
+!
+!
+!
+!
+!
+interface FastEthernet0/0
+ no ip address
+ duplex auto
+ speed auto
+ shutdown
+!
+interface FastEthernet0/1
+ no ip address
+ duplex auto
+ speed auto
+ shutdown
+!
+interface Serial0/0/0
+ ip address 172.30.0.1 255.255.255.240
+ encapsulation frame-relay
+ clock rate 64000
+!
+interface Serial0/1/0
+ ip address 192.168.0.1 255.255.255.252
+ clock rate 64000
+!
+interface Serial0/2/0
+ ip address 192.168.0.5 255.255.255.252
+ encapsulation ppp
+ clock rate 64000
+!
+interface Serial0/3/0
+ ip address 192.168.0.9 255.255.255.252
+ encapsulation ppp
+ ppp authentication chap
+

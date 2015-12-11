@@ -1,0 +1,352 @@
+
+
+## HSRP
+
+
+R1#sh standby 
+FastEthernet0/0 - Group 1 (version 2)
+  State is Active
+    5 state changes, last state change 00:00:19
+  Virtual IP address is 192.168.10.1
+  Active virtual MAC address is 0000.0C9F.F001
+    Local virtual MAC address is 0000.0C9F.F001 (v2 default)
+  Hello time 3 sec, hold time 10 sec
+    Next hello sent in 2.565 secs
+  Preemption disabled
+  Active router is local
+  Standby router is 192.168.10.253
+  Priority 100 (default 100)
+  Group name is hsrp-Fa0/0-1 (default)
+
+## Check which interface is setup on HSRP
+## Identifies "State is Active" and "Active router is local" and "Standby router is 192.168.10.253
+## Shares a "virtual MAC address"
+## Every 3s and hold time 10s 
+
+## Commands to enable HSRP
+
+ standby version 2
+ standby 1 ip 192.168.10.1
+
+## Above standby identifies the same Virtual IP that all routers share
+
+
+## Change to make R2 the Active router and R1 Standby
+
+R2#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R2(config)#int fa0/0
+R2(config-if)#st
+R2(config-if)#standby ?
+  <0-4095>  group number
+  ip        Enable HSRP and set the virtual IP address
+  ipv6      Enable HSRP IPv6
+  preempt   Overthrow lower priority Active routers
+  priority  Priority level
+  timers    Hello and hold timers
+  track     Priority Tracking
+R2(config-if)#standby 1 ?
+  ip        Enable HSRP and set the virtual IP address
+  ipv6      Enable HSRP IPv6
+  preempt   Overthrow lower priority Active routers
+  priority  Priority level
+  timers    Hello and hold timers
+  track     Priority Tracking
+R2(config-if)#standby 1 ip ?
+  A.B.C.D  Virtual IP address
+  <cr>
+R2(config-if)#standby 1 pro
+R2(config-if)#standby 1 pri
+R2(config-if)#standby 1 priority ?
+  <0-255>  Priority value
+R2(config-if)#standby 1 priority 105 
+R2(config-if)#stan
+R2(config-if)#standby pre
+R2(config-if)#standby ?
+  <0-4095>  group number
+  ip        Enable HSRP and set the virtual IP address
+  ipv6      Enable HSRP IPv6
+  preempt   Overthrow lower priority Active routers
+  priority  Priority level
+  timers    Hello and hold timers
+  track     Priority Tracking
+R2(config-if)#standby pree
+R2(config-if)#standby preempt 
+R2(config-if)#standby 1 preempt 
+R2(config-if)#
+ %HSRP-6-STATECHANGE: FastEthernet0/0 Grp 1 state Standby -> Active
+
+R2(config-if)#end
+R2#
+
+## Enabling 'preempt' and change 'priority' in theory 'Highest IP Address' wins
+
+## On Real gear 'first router wins' 
+
+!
+interface FastEthernet0/0
+ ip address 192.168.10.253 255.255.255.0
+ duplex auto
+ speed auto
+ standby version 2
+ standby 1 ip 192.168.10.1
+ standby 1 priority 105
+ standby 1 preempt
+
+
+
+R1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R1(config)#int fa0/0
+R1(config-if)#st
+R1(config-if)#standby 1 pree
+R1(config-if)#standby pree
+R1(config-if)#standby preempt 
+R1(config-if)#standby 1 pree
+R1(config-if)#stan
+R1(config-if)#standby ?
+  <0-4095>  group number
+  ip        Enable HSRP and set the virtual IP address
+  ipv6      Enable HSRP IPv6
+  preempt   Overthrow lower priority Active routers
+  priority  Priority level
+  timers    Hello and hold timers
+  track     Priority Tracking
+R1(config-if)#standby gr
+R1(config-if)#standby 1 pre
+R1(config-if)#standby 1 preempt ?
+  <cr>
+R1(config-if)#standby 1 preempt 
+R1(config-if)#
+
+
+
+R2#sh stan
+FastEthernet0/0 - Group 1 (version 2)
+  State is Active
+    8 state changes, last state change 00:11:03
+  Virtual IP address is 192.168.10.1
+  Active virtual MAC address is 0000.0C9F.F001
+    Local virtual MAC address is 0000.0C9F.F001 (v2 default)
+  Hello time 3 sec, hold time 10 sec
+    Next hello sent in 1.523 secs
+  Preemption enabled
+  Active router is local
+  Standby router is 192.168.10.254, priority 105 (expires in 7 sec)
+  Priority 105 (configured 105)
+  Group name is hsrp-Fa0/0-1 (default)
+
+R2#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R2(config)#int fa0/0
+R2(config-if)#shut
+
+R2(config-if)#
+ %HSRP-6-STATECHANGE: FastEthernet0/0 Grp 1 state Active -> Init
+
+%LINK-5-CHANGED: Interface FastEthernet0/0, changed state to administratively down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/0, changed state to down
+
+00:18:08: %OSPF-5-ADJCHG: Process 13, Nbr 192.168.20.1 on FastEthernet0/0 from FULL to DOWN, Neighbor Down: Interface down or detached
+
+
+R1#
+%HSRP-6-STATECHANGE: FastEthernet0/0 Grp 1 state Standby -> Active
+
+00:18:40: %OSPF-5-ADJCHG: Process 10, Nbr 192.168.20.2 on FastEthernet0/0 from FULL to DOWN, Neighbor Down: Dead timer expired
+
+00:18:40: %OSPF-5-ADJCHG: Process 10, Nbr 192.168.20.2 on FastEthernet0/0 from FULL to DOWN, Neighbor Down: Interface down or detached
+
+R2(config-if)#no shut
+
+R2(config-if)#
+%LINK-5-CHANGED: Interface FastEthernet0/0, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/0, changed state to up
+
+ %HSRP-6-STATECHANGE: FastEthernet0/0 Grp 1 state Standby -> Active
+
+R2(config-if)#shut
+00:20:25: %OSPF-5-ADJCHG: Process 13, Nbr 192.168.20.1 on FastEthernet0/0 from LOADING to FULL, Loading D
+
+
+## The above Simulated outage change Active to R1 AND upon fixing R2, the preempt and priority 
+## reversed and set R2 back to Active
+
+## Tracking (Packet Tracer can only track interfaces, but real gear can track packets)
+
+## While configuring 'int fa0/0' issue this command for tracking
+
+R2(config-if)#standby 1 ?
+  ip        Enable HSRP and set the virtual IP address
+  ipv6      Enable HSRP IPv6
+  preempt   Overthrow lower priority Active routers
+  priority  Priority level
+  timers    Hello and hold timers
+  track     Priority Tracking
+R2(config-if)#standby 1 tr
+R2(config-if)#standby 1 track ?
+  FastEthernet     FastEthernet IEEE 802.3
+  GigabitEthernet  GigabitEthernet IEEE 802.3z
+  Serial           Serial
+R2(config-if)#standby 1 track fa0/1
+
+R2#sh stan
+FastEthernet0/0 - Group 1 (version 2)
+  State is Active
+    13 state changes, last state change 00:20:12
+  Virtual IP address is 192.168.10.1
+  Active virtual MAC address is 0000.0C9F.F001
+    Local virtual MAC address is 0000.0C9F.F001 (v2 default)
+  Hello time 3 sec, hold time 10 sec
+    Next hello sent in 1.823 secs
+  Preemption enabled
+  Active router is local
+  Standby router is 192.168.10.254, priority 105 (expires in 7 sec)
+  Priority 105 (configured 105)
+    Track interface FastEthernet0/1 state Up decrement 10
+  Group name is hsrp-Fa0/0-1 (default)
+
+## The tracking interface "Up decrement 10" 105 - 10 = 95 (trigger R1 to take over)
+
+R2#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R2(config)#int fa0/0
+R2(config-if)#shut
+
+R2(config-if)#
+ %HSRP-6-STATECHANGE: FastEthernet0/0 Grp 1 state Active -> Init
+
+%LINK-5-CHANGED: Interface FastEthernet0/0, changed state to administratively down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/0, changed state to down
+
+00:18:08: %OSPF-5-ADJCHG: Process 13, Nbr 192.168.20.1 on FastEthernet0/0 from FULL to DOWN, Neighbor Down: Interface down or detached
+
+R2(config-if)#no shut
+
+R2(config-if)#
+%LINK-5-CHANGED: Interface FastEthernet0/0, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/0, changed state to up
+
+ %HSRP-6-STATECHANGE: FastEthernet0/0 Grp 1 state Standby -> Active
+
+R2(config-if)#shut
+00:20:25: %OSPF-5-ADJCHG: Process 13, Nbr 192.168.20.1 on FastEthernet0/0 from LOADING to FULL, Loading D
+R2(config-if)#st
+R2(config-if)#standby 1 ?
+  ip        Enable HSRP and set the virtual IP address
+  ipv6      Enable HSRP IPv6
+  preempt   Overthrow lower priority Active routers
+  priority  Priority level
+  timers    Hello and hold timers
+  track     Priority Tracking
+R2(config-if)#standby 1 tr
+R2(config-if)#standby 1 track ?
+  FastEthernet     FastEthernet IEEE 802.3
+  GigabitEthernet  GigabitEthernet IEEE 802.3z
+  Serial           Serial
+R2(config-if)#standby 1 track fa0/1
+R2(config-if)#end
+R2#
+%SYS-5-CONFIG_I: Configured from console by console
+
+R2#sh stan
+FastEthernet0/0 - Group 1 (version 2)
+  State is Active
+    13 state changes, last state change 00:20:12
+  Virtual IP address is 192.168.10.1
+  Active virtual MAC address is 0000.0C9F.F001
+    Local virtual MAC address is 0000.0C9F.F001 (v2 default)
+  Hello time 3 sec, hold time 10 sec
+    Next hello sent in 1.823 secs
+  Preemption enabled
+  Active router is local
+  Standby router is 192.168.10.254, priority 105 (expires in 7 sec)
+  Priority 105 (configured 105)
+    Track interface FastEthernet0/1 state Up decrement 10
+  Group name is hsrp-Fa0/0-1 (default)
+R2#
+R2#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R2(config)#int fa0/1
+R2(config-if)#shut
+
+R2(config-if)#
+%LINK-5-CHANGED: Interface FastEthernet0/1, changed state to administratively down
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/1, changed state to down
+
+00:28:08: %OSPF-5-ADJCHG: Process 13, Nbr 192.168.30.1 on FastEthernet0/1 from FULL to DOWN, Neighbor Down: Interface down or detached
+
+00:28:08: %OSPF-5-ADJCHG: Process 13, Nbr 192.168.20.1 on FastEthernet0/1 from FULL to DOWN, Neighbor Down: Interface down or detached
+
+R2(config-if)#end
+R2#
+%SYS-5-CONFIG_I: Configured from console by console
+
+R2#sh st
+R2#sh stan
+FastEthernet0/0 - Group 1 (version 2)
+  State is Speak
+    16 state changes, last state change 00:28:19
+  Virtual IP address is 192.168.10.1
+  Active virtual MAC address is 0000.0C9F.F001
+    Local virtual MAC address is 0000.0C9F.F001 (v2 default)
+  Hello time 3 sec, hold time 10 sec
+    Next hello sent in 291.861 secs
+  Preemption enabled
+  Active router is 192.168.10.254
+  Standby router is 192.168.10.254
+  Priority 95 (configured 105)
+    Track interface FastEthernet0/1 state Down decrement 10
+  Group name is hsrp-Fa0/0-1 (default)
+R2#
+%HSRP-6-STATECHANGE: FastEthernet0/0 Grp 1 state Speak -> Standby
+
+
+R1#sh stan
+FastEthernet0/0 - Group 1 (version 2)
+  State is Active
+    10 state changes, last state change 00:18:16
+  Virtual IP address is 192.168.10.1
+  Active virtual MAC address is 0000.0C9F.F001
+    Local virtual MAC address is 0000.0C9F.F001 (v2 default)
+  Hello time 3 sec, hold time 10 sec
+    Next hello sent in 2.363 secs
+  Preemption enabled
+  Active router is local
+  Standby router is unknown, priority 100
+  Priority 100 (default 100)
+  Group name is hsrp-Fa0/0-1 (default)
+R1#
+%HSRP-6-STATECHANGE: FastEthernet0/0 Grp 1 state Speak -> Standby
+
+00:20:25: %OSPF-5-ADJCHG: Process 10, Nbr 192.168.20.2 on FastEthernet0/0 from LOADING to FULL, Loading Done
+
+R1#
+ %HSRP-6-STATECHANGE: FastEthernet0/0 Grp 1 state Standby -> Active
+
+00:28:40: %OSPF-5-ADJCHG: Process 10, Nbr 192.168.20.2 on FastEthernet0/1 from FULL to DOWN, Neighbor Down: Dead timer expired
+
+00:28:40: %OSPF-5-ADJCHG: Process 10, Nbr 192.168.20.2 on FastEthernet0/1 from FULL to DOWN, Neighbor Down: Interface down or detached
+
+R1#sh stan
+FastEthernet0/0 - Group 1 (version 2)
+  State is Active
+    15 state changes, last state change 00:28:09
+  Virtual IP address is 192.168.10.1
+  Active virtual MAC address is 0000.0C9F.F001
+    Local virtual MAC address is 0000.0C9F.F001 (v2 default)
+  Hello time 3 sec, hold time 10 sec
+    Next hello sent in 2.773 secs
+  Preemption enabled
+  Active router is local
+  Standby router is 192.168.10.253, priority 100 (expires in 8 sec)
+  Priority 100 (default 100)
+  Group name is hsrp-Fa0/0-1 (default)
+
+
+

@@ -1,8 +1,331 @@
-
 ## Zone Based Firewall
 
 ## Convert a Router into a Firewall - R3
 
-## 
+##  Step 1: Create Zone
+
+zone security IN-ZONE
+zone security OUT-ZONE
+
+R3#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R3(config)#zone se
+R3(config)#zone security IN-ZONE
+R3(config-sec-zone)#zone security OUT-ZONE
+R3(config-sec-zone)#exit
+R3(config-sec-zone)#exit
+R3(config)# access-list 101 permit ip 192.168.3.0 0.0.0.255 any
+
+! ## Above Identifies Traffic! ##
+
+## Step 2: Create Class Map
+
+R3(config)#class-m
+R3(config)#class-map ?
+  WORD       class-map name
+  match-all  Logical-AND all matching statements under this classmap
+  match-any  Logical-OR all matching statements under this classmap
+  type       type of the class-map
+R3(config)#class-map ty
+R3(config)#class-map type ?
+  inspect  Configure CBAC Class Map
+R3(config)#class-map type ins
+R3(config)#class-map type inspect ?
+  WORD       class-map name
+  match-all  Logical-AND all matching statements under this classmap
+  match-any  Logical-OR all matching statements under this classmap
+R3(config)#class-map type inspect match-a
+R3(config)#class-map type inspect match-an
+R3(config)#class-map type inspect match-any ?
+  WORD  class-map name
+R3(config)#class-map type inspect match-any IN-NET-CLASS-MAP
+R3(config-cmap)#
+
+R3(config-cmap)#?
+  description  Class-Map description
+  exit         Exit from class-map configuration mode
+  match        classification criteria
+  no           Negate or set default values of a command
+R3(config-cmap)#mat
+R3(config-cmap)#match ?
+  access-group         Access group
+  any                  Any packets
+  class-map            Class map
+  cos                  IEEE 802.1Q/ISL class of service/user priority values
+  destination-address  Destination address
+  input-interface      Select an input interface to match
+  ip                   IP specific values
+  not                  Negate this match result
+  precedence           Match Precedence in IP(v4) and IPv6 packets
+  protocol             Protocol
+  qos-group            Qos-group
+R3(config-cmap)#match ac
+R3(config-cmap)#match access-group ?
+  <1-2699>  Access list index
+  name      Named Access List
+R3(config-cmap)#match access-group 101
+
+! ## For explanaion of granular control of traffic
+
+R3(config-cmap)#match protocol  ?
+  bgp     Border Gateway Protocol
+  dns     Domain Name Server lookup
+  eigrp   Enhanced Interior Gateway Routing Protocol
+  ftp     File Transfer Protocol
+  h323    H323 Protocol
+  http    World Wide Web traffic
+  icmp    ICMP
+  ipv6    IPV6
+  ntp     Network Time Protocol
+  pop3    Post Office Protocol
+  rtp     Real Time Protocol
+  skinny  Skinny Call Control Protocol
+  smtp    Simple Mail Transfer Protocol
+  snmp    Simple Network Management Protocol
+  ssh     Secured Shell
+  syslog  System Logging Utility
+  tcp     TCP
+  telnet  Telnet
+  tftp    Trivial File Transfer Protocol
+  udp     User Datagram Protocol
+
+
+## Step 3: Set the Policy Map
+
+R3(config)#policy-map ?
+  WORD  policy-map name
+  type  type of the policy-map
+R3(config)#policy-map ty
+R3(config)#policy-map type ?
+  inspect  Configure CBAC Policy Map
+R3(config)#policy-map type in
+R3(config)#policy-map type inspect ?
+  WORD  policy-map name
+R3(config)#policy-map type inspect IN-2-OUT-PMAP
+R3(config-pmap)#?
+  class  policy criteria
+  exit   Exit from policy-map configuration mode
+  no     Negate or set default values of a command
+R3(config-pmap)#clas
+R3(config-pmap)#class ?
+  WORD           class-map name
+  class-default  System default class matching otherwise unclassified packets
+  type           type of the class-map
+R3(config-pmap)#class ty
+R3(config-pmap)#class type ?
+  inspect  Configure CBAC Class Map
+R3(config-pmap)#class type in
+R3(config-pmap)#class type inspect IN-NET-CLASS-MAP
+R3(config-pmap-c)#?
+  drop     Drop the packet
+  exit     Exit from class action configuration mode
+  inspect  Context-based Access Control Engine
+  no       Negate or set default values of a command
+  pass     Pass the packet
+R3(config-pmap-c)#ins
+R3(config-pmap-c)#inspect 
+%No specific protocol configured in class IN-NET-CLASS-MAP for inspection. All protocols will be inspected
+R3(config-pmap-c)#exit
+R3(config-pmap)#exit
+
+## Step 4: Create Zone Pairs
+
+R3(config)#zone-pair security ?
+  WORD  Name of zone-pair
+R3(config)#zone-pair security IN-2-OUT-ZPAIR source IN-ZONE destination OUT-ZONE
+R3(config-sec-zone-pair)#service-policy type inspect IN-2-OUT-PMAP
+R3(config-sec-zone-pair)#exit
+R3(config)#
+
+## Step 5: Assign Interfaces to Zones
+
+R3(config)#int fa0/1
+R3(config-if)#zone-member security IN-ZONE
+R3(config-if)#exit
+R3(config)#int s0/0/1
+R3(config-if)#zone-member security OUT-ZONE
+R3(config-if)#exit
+R3(config)#end
+
+## Full Running Configuration
+
+
+R3#sh run
+Building configuration...
+
+Current configuration : 1342 bytes
+!
+version 12.4
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+no service password-encryption
+!
+hostname R3
+!
+!
+!
+enable secret 5 $1$mERr$TfFTxE.mmb5O5BVC56ndL0
+!
+!
+!
+!
+!
+!
+ip cef
+no ipv6 cef
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip ssh version 1
+ip name-server 0.0.0.0
+!
+!
+spanning-tree mode pvst
+!
+class-map type inspect match-any IN-NET-CLASS-MAP
+ match access-group 101
+!
+policy-map type inspect IN-2-OUT-PMAP
+ class type inspect IN-NET-CLASS-MAP
+  inspect
+!
+!
+!
+zone security IN-ZONE
+zone security OUT-ZONE
+zone-pair security IN-2-OUT-ZPAIR source IN-ZONE destination OUT-ZONE
+ service-policy type inspect IN-2-OUT-PMAP
+!
+!
+interface FastEthernet0/0
+ no ip address
+ duplex auto
+ speed auto
+ shutdown
+!
+interface FastEthernet0/1
+ ip address 192.168.3.1 255.255.255.0
+ zone-member security IN-ZONE
+ duplex auto
+ speed auto
+!
+interface Serial0/0/0
+ no ip address
+ clock rate 2000000
+ shutdown
+!
+interface Serial0/0/1
+ ip address 10.2.2.1 255.255.255.252
+ zone-member security OUT-ZONE
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+ip classless
+ip route 0.0.0.0 0.0.0.0 10.2.2.2 
+!
+ip flow-export version 9
+!
+!
+access-list 101 permit ip 192.168.3.0 0.0.0.255 any
+!
+!
+!
+!
+!
+logging trap debugging
+line con 0
+ password ciscoconpa55
+ login
+!
+line aux 0
+!
+line vty 0 4
+ password ciscovtypa55
+ login
+!
+!
+ntp update-calendar
+!
+end
+
+
+## Test Firewall Configuration
+
+## Check R3 
+
+R3#show policy-map type inspect zone-pair sessions
+ Zone-pair: IN-2-OUT-ZPAIR
+
+  Service-policy inspect : IN-2-OUT-PMAP
+
+    Class-map: IN-NET-CLASS-MAP (match-any)
+      Match: access-group 101
+        0 packets, 0 bytes
+        30 second rate 0 bps
+      Inspect
+
+    Class-map: class-default (match-any)
+      Match: any
+      Drop (default action)
+        0 packets, 0 bytes
+
+
+## Ping PC-C to PC-A: traffic is caught
+
+PC>ping 192.168.1.3
+
+Pinging 192.168.1.3 with 32 bytes of data:
+
+Request timed out.
+Reply from 192.168.1.3: bytes=32 time=12ms TTL=125
+Reply from 192.168.1.3: bytes=32 time=2ms TTL=125
+Reply from 192.168.1.3: bytes=32 time=12ms TTL=125
+
+Ping statistics for 192.168.1.3:
+    Packets: Sent = 4, Received = 3, Lost = 1 (25% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 2ms, Maximum = 12ms, Average = 8ms
+
+PC>
+
+
+R3#show policy-map type inspect zone-pair sessions
+ Zone-pair: IN-2-OUT-ZPAIR
+
+  Service-policy inspect : IN-2-OUT-PMAP
+
+    Class-map: IN-NET-CLASS-MAP (match-any)
+      Match: access-group 101
+        4 packets, 512 bytes
+        30 second rate 0 bps
+      Inspect
+
+    Class-map: class-default (match-any)
+      Match: any
+      Drop (default action)
+        0 packets, 0 bytes
+
+## From PC-C, telnet to R2 10.2.2.2
+
+PC>telnet 10.2.2.2
+Trying 10.2.2.2 ...Open
+
+
+User Access Verification
+
+Password: 
+Password: 
+Password: 
+R2>
+
 
 

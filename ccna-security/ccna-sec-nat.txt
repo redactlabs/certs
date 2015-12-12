@@ -1,0 +1,223 @@
+## NAT
+
+## Start translating
+
+p int br
+Interface              IP-Address      OK? Method Status                Protocol
+ 
+FastEthernet0/0        192.168.1.1     YES manual up                    up
+ 
+FastEthernet0/1        unassigned      YES unset  administratively down down
+ 
+Serial0/0/0            209.165.200.242 YES manual up                    up
+ 
+Vlan1                  unassigned      YES unset  administratively down down
+Branch#sh ip nat tr
+Branch#sh ip nat translations
+
+
+
+PC>ping 209.165.200.241 -n 10
+
+Pinging 209.165.200.241 with 32 bytes of data:
+
+Reply from 209.165.200.241: bytes=32 time=12ms TTL=254
+Reply from 209.165.200.241: bytes=32 time=1ms TTL=254
+Reply from 209.165.200.241: bytes=32 time=1ms TTL=254
+Reply from 209.165.200.241: bytes=32 time=1ms TTL=254
+
+
+Branch#sh ip nat translations 
+Pro  Inside global     Inside local       Outside local      Outside global
+icmp 209.165.200.249:10192.168.1.10:10    209.165.200.241:10 209.165.200.241:10
+icmp 209.165.200.249:1 192.168.1.10:1     209.165.200.241:1  209.165.200.241:1
+icmp 209.165.200.249:2 192.168.1.10:2     209.165.200.241:2  209.165.200.241:2
+icmp 209.165.200.249:3 192.168.1.10:3     209.165.200.241:3  209.165.200.241:3
+icmp 209.165.200.249:4 192.168.1.10:4     209.165.200.241:4  209.165.200.241:4
+icmp 209.165.200.249:5 192.168.1.10:5     209.165.200.241:5  209.165.200.241:5
+icmp 209.165.200.249:6 192.168.1.10:6     209.165.200.241:6  209.165.200.241:6
+icmp 209.165.200.249:7 192.168.1.10:7     209.165.200.241:7  209.165.200.241:7
+icmp 209.165.200.249:8 192.168.1.10:8     209.165.200.241:8  209.165.200.241:8
+icmp 209.165.200.249:9 192.168.1.10:9     209.165.200.241:9  209.165.200.241:9
+
+
+interface FastEthernet0/0
+ ip address 192.168.1.1 255.255.255.0
+ ip nat inside
+ duplex auto
+ speed auto
+!
+interface FastEthernet0/1
+ no ip address
+ duplex auto
+ speed auto
+ shutdown
+!
+interface Serial0/0/0
+ description Connection to ISP
+ bandwidth 64
+ ip address 209.165.200.242 255.255.255.248
+ ip nat outside
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+ip nat pool BRANCH-NAT-POOL 209.165.200.249 209.165.200.254 netmask 255.255.255.248
+ip nat inside source list BRANCH-NAT-ACL pool BRANCH-NAT-POOL
+!
+! ## Connect the ACL with the NAT Pool ##
+!
+ip classless
+ip route 0.0.0.0 0.0.0.0 209.165.200.241 
+!
+ip flow-export version 9
+!
+! ## Extended ACL ##
+ip access-list extended BRANCH-NAT-ACL
+ remark Do not translate Local LAN to HQ LAN addresses
+ deny ip 192.168.1.0 0.0.0.255 10.10.0.0 0.0.255.255
+ remark Translate Local LAN to all other Internet destinations
+ permit ip 192.168.1.0 0.0.0.255 any
+!
+
+PC>ping 10.10.10.10
+
+Pinging 10.10.10.10 with 32 bytes of data:
+
+Request timed out.
+Request timed out.
+Request timed out.
+Request timed out.
+
+Ping statistics for 10.10.10.10:
+    Packets: Sent = 4, Received = 0, Lost = 4 (100% loss)
+
+Branch#sh access-lists 
+Extended IP access list BRANCH-NAT-ACL
+    10 deny ip 192.168.1.0 0.0.0.255 10.10.0.0 0.0.255.255 (3 match(es))
+    20 permit ip 192.168.1.0 0.0.0.255 any (20 match(es))
+Branch#sh access-lists 
+Extended IP access list BRANCH-NAT-ACL
+    10 deny ip 192.168.1.0 0.0.0.255 10.10.0.0 0.0.255.255 (4 match(es))
+    20 permit ip 192.168.1.0 0.0.0.255 any (20 match(es))
+
+
+## The next level is encapsulating by VPN to create tunnels
+
+## Step 1 and Step 2 always the same
+
+## Identify the interfaces for the 'inside' NAT, then 
+## identify the 'outside' NAT
+
+nterface FastEthernet0/0
+ ip address 10.10.10.1 255.255.255.0
+ ip nat inside
+ duplex auto
+ speed auto
+!
+interface FastEthernet0/1
+ ip address 10.10.20.1 255.255.255.0
+ ip nat inside
+ duplex auto
+ speed auto
+!
+interface Serial0/0/0
+ description Connection to ISP
+ bandwidth 64
+ ip address 209.165.200.226 255.255.255.248
+ ip nat outside
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+ip nat pool HQ-NAT-POOL 209.165.200.233 209.165.200.237 netmask 255.255.255.248
+ip nat inside source list HQ-NAT-ACL pool HQ-NAT-POOL
+! ## The following is a Static NAT ##
+ip nat inside source static 10.10.20.238 209.165.200.238 
+ip classless
+ip route 0.0.0.0 0.0.0.0 209.165.200.225 
+!
+ip flow-export version 9
+!
+!
+ip access-list extended HQ-NAT-ACL
+ remark Do not translate HQ LAN to Branch LAN addresses
+ deny ip 10.10.0.0 0.0.255.255 192.168.1.0 0.0.0.255
+ remark Translate Local LAN to all other Internet destinations
+ permit ip 10.10.0.0 0.0.255.255 any
+!
+!
+!
+!
+!
+line con 0
+!
+line aux 0
+!
+line vty 0 4
+ login
+!
+!
+!
+end
+
+SERVER>ping 209.165.200.241
+
+Pinging 209.165.200.241 with 32 bytes of data:
+
+Reply from 209.165.200.241: bytes=32 time=2ms TTL=254
+Reply from 209.165.200.241: bytes=32 time=1ms TTL=254
+Reply from 209.165.200.241: bytes=32 time=1ms TTL=254
+Reply from 209.165.200.241: bytes=32 time=1ms TTL=254
+
+Ping statistics for 209.165.200.241:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 1ms, Maximum = 2ms, Average = 1ms
+
+SERVER>ipconfig
+
+FastEthernet0 Connection:(default port)
+
+   Link-local IPv6 Address.........: FE80::20B:BEFF:FEB4:4C4C
+   IP Address......................: 10.10.20.238
+   Subnet Mask.....................: 255.255.255.0
+   Default Gateway.................: 10.10.20.1
+
+
+
+HQ#sh ip nat translations 
+Pro  Inside global     Inside local       Outside local      Outside global
+icmp 209.165.200.238:1010.10.20.238:10    209.165.200.241:10 209.165.200.241:10
+icmp 209.165.200.238:1110.10.20.238:11    209.165.200.241:11 209.165.200.241:11
+icmp 209.165.200.238:1210.10.20.238:12    209.165.200.241:12 209.165.200.241:12
+icmp 209.165.200.238:5 10.10.20.238:5     209.165.200.241:5  209.165.200.241:5
+icmp 209.165.200.238:6 10.10.20.238:6     209.165.200.241:6  209.165.200.241:6
+icmp 209.165.200.238:7 10.10.20.238:7     209.165.200.241:7  209.165.200.241:7
+icmp 209.165.200.238:8 10.10.20.238:8     209.165.200.241:8  209.165.200.241:8
+icmp 209.165.200.238:9 10.10.20.238:9     209.165.200.241:9  209.165.200.241:9
+
+## Connect to 209.165.200.238 HTTP
+
+Branch#sh ip nat translations 
+Pro  Inside global     Inside local       Outside local      Outside global
+tcp 209.165.200.249:1025192.168.1.10:1025  209.165.200.238:80 209.165.200.238:80
+tcp 209.165.200.249:1026192.168.1.10:1026  209.165.200.238:80 209.165.200.238:80
+tcp 209.165.200.249:1027192.168.1.10:1027  209.165.200.238:80 209.165.200.238:80
+tcp 209.165.200.249:1028192.168.1.10:1028  209.165.200.238:80 209.165.200.238:80
+tcp 209.165.200.249:1029192.168.1.10:1029  209.165.200.238:80 209.165.200.238:80
+tcp 209.165.200.249:1030192.168.1.10:1030  209.165.200.238:80 209.165.200.238:80
+
+HQ#sh ip nat translations 
+Pro  Inside global     Inside local       Outside local      Outside global
+---  209.165.200.238   10.10.20.238       ---                ---
+tcp 209.165.200.238:80 10.10.20.238:80    209.165.200.249:1025209.165.200.249:1025
+tcp 209.165.200.238:80 10.10.20.238:80    209.165.200.249:1026209.165.200.249:1026
+tcp 209.165.200.238:80 10.10.20.238:80    209.165.200.249:1027209.165.200.249:1027
+tcp 209.165.200.238:80 10.10.20.238:80    209.165.200.249:1028209.165.200.249:1028
+tcp 209.165.200.238:80 10.10.20.238:80    209.165.200.249:1029209.165.200.249:1029
+tcp 209.165.200.238:80 10.10.20.238:80    209.165.200.249:1030209.165.200.249:1030
+
+
